@@ -1,0 +1,30 @@
+---
+import Guia from '../../components/Guia.astro';
+import { estaciones, media, eur, provincias } from '../../lib/datos.mjs';
+const ambas = estaciones.filter((e) => e.gb && e.ga);
+const pGb = media(estaciones.filter((e) => e.gb).map((e) => e.gb));
+const dif = media(ambas.map((e) => e.ga - e.gb));
+const nGb = estaciones.filter((e) => e.gb).length;
+const top = provincias.map((p) => [p, p.est.filter((e) => e.gb).length]).sort((a, b) => b[1] - a[1]).slice(0, 5);
+const difImp = ((307 + 72) - (78.71 + 18)) / 1000;
+---
+<Guia slug="gasoleo-b-agricola" conDatos fuentes={[
+  ['Ley 38/1992, de Impuestos Especiales, arts. 50, 54 y 55 (BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+]}>
+  <p>El gasóleo B, conocido como «gasóleo agrícola» o bonificado, es gasóleo que paga mucho menos impuesto especial porque solo puede usarse en determinados motores. Hoy lo venden <strong>{nGb.toLocaleString('es-ES')} gasolineras</strong>, a una media de <strong>{eur(pGb)}/l</strong>. En las estaciones que venden los dos, es {eur(dif)} por litro más barato que el gasóleo A.</p>
+  <h2>Por qué es más barato</h2>
+  <p>La Ley 38/1992 fija un impuesto de 96,71 € por cada 1.000 litros para el gasóleo bonificado (epígrafe 1.4: 78,71 € de tipo general y 18 € de tipo especial), frente a 379 € del gasóleo de uso general. Es una diferencia de {(difImp * 100).toFixed(1).replace('.', ',')} céntimos por litro, y de {(difImp * 121).toFixed(1).replace('.', ',')} céntimos con IVA.</p>
+  <h2>Quién puede usarlo</h2>
+  <p>Según el artículo 54.2 de la ley, el gasóleo con este tipo reducido puede usarse como carburante en todos los motores <strong>excepto</strong>:</p>
+  <ul>
+    <li>Los de vehículos autorizados para circular por vías públicas, incluidos los vehículos especiales. <strong>Excepción</strong>: sí pueden usarlo los tractores y la maquinaria agrícola autorizados para circular, cuando se empleen en la agricultura (incluida la horticultura), la ganadería y la silvicultura.</li>
+    <li>Los de artefactos que, por sus características, podrían ser autorizados para circular como vehículos (aunque no tengan la autorización).</li>
+    <li>Los de buques y embarcaciones de recreo.</li>
+  </ul>
+  <p>Fuera de los casos permitidos, está prohibido usar como carburante el gasóleo que lleva los trazadores y marcadores que lo identifican.</p>
+  <h2>¿Y si lo pongo en mi coche?</h2>
+  <p>El artículo 55 de la ley considera <strong>infracción tributaria grave</strong> no respetar estas limitaciones. Es responsable el titular del vehículo que lo use o lo lleve en el depósito. El marcador permite detectarlo en una inspección. El ahorro no compensa el riesgo.</p>
+  <h2>Provincias con más puntos de venta</h2>
+  <ul>{top.map(([p, n]) => <li><a href={p.url}>{p.nombre}</a>: {n} gasolineras</li>)}</ul>
+</Guia>

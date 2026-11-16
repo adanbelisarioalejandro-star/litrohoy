@@ -1,0 +1,37 @@
+---
+import Guia from '../../components/Guia.astro';
+import { provincias, municipios, media, eur } from '../../lib/datos.mjs';
+const fuera = new Set(['35', '38', '51', '52']);
+const pen = provincias.filter((p) => !fuera.has(p.id) && p.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
+const dif = pen.at(-1).stats.ga.media - pen[0].stats.ga.media;
+// Competencia: precio del diésel según cuántas gasolineras hay en el municipio (Península y Baleares)
+const tramos = [[1, 1, '1 gasolinera'], [2, 4, '2 a 4'], [5, 9, '5 a 9'], [10, 1e9, '10 o más']].map(([a, b, t]) => {
+  const ms = municipios.filter((m) => !fuera.has(m.prov) && m.est.length >= a && m.est.length <= b && m.stats.ga);
+  const precios = ms.flatMap((m) => m.est.filter((e) => e.ga).map((e) => e.ga));
+  return { t, municipios: ms.length, est: precios.length, media: media(precios) };
+});
+const brecha = (tramos[0].media - tramos[3].media) * 100;
+---
+<Guia slug="por-que-cambia-el-precio-por-provincia" conDatos fuentes={[
+  ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+  ['Ley 38/1992, de Impuestos Especiales, art. 50 (BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['CNMC: impacto del tipo especial único que grava gasolinas y gasóleos (marzo de 2019)', 'https://www.cnmc.es/node/374032'],
+]}>
+  <p>Hoy, sin contar Canarias, Ceuta y Melilla, la provincia con el diésel más barato es <a href={pen[0].url}>{pen[0].nombre}</a> ({eur(pen[0].stats.ga.media)}/l) y la más cara, <a href={pen.at(-1).url}>{pen.at(-1).nombre}</a> ({eur(pen.at(-1).stats.ga.media)}/l). Son {(dif * 100).toFixed(1).replace('.', ',')} céntimos por litro de diferencia. ¿Por qué?</p>
+  <h2>1. Los impuestos: iguales en la Península y Baleares</h2>
+  <p>Hasta 2018, cada comunidad autónoma podía añadir un «tramo autonómico» al impuesto sobre hidrocarburos, de entre 0 y 4,8 céntimos por litro. Desde el 1 de enero de 2019 ese tramo se integró en el tipo estatal, que ahora es igual en toda la Península y Baleares. El IVA también es del 21 % en todas partes. Así que, salvo en Canarias, Ceuta y Melilla (con tributos propios), <strong>los impuestos no explican las diferencias entre provincias</strong>. Las explican el producto, la logística y, sobre todo, los márgenes y la competencia.</p>
+  <h2>2. La competencia: más gasolineras, precios más bajos</h2>
+  <p>Hemos agrupado los municipios según cuántas gasolineras tienen y calculado el precio medio del diésel en cada grupo:</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Gasolineras en el municipio</th><th class="n">Municipios</th><th class="n">Estaciones</th><th class="n">Diésel medio</th></tr></thead>
+    <tbody>{tramos.map((r) => <tr><td>{r.t}</td><td class="n">{r.municipios}</td><td class="n">{r.est}</td><td class="n">{eur(r.media)}</td></tr>)}</tbody>
+  </table></div>
+  <p>{brecha > 0
+    ? `En los municipios con una sola gasolinera, el diésel cuesta de media ${brecha.toFixed(1).replace('.', ',')} céntimos más que en los que tienen diez o más.`
+    : `Hoy, curiosamente, los municipios con una sola gasolinera no son más caros que los grandes (diferencia de ${brecha.toFixed(1).replace('.', ',')} céntimos).`}
+    Que haya muchas estaciones cerca obliga a ajustar precios. Además, en las ciudades grandes es más fácil encontrar estaciones de bajo coste y de hipermercado.</p>
+  <h2>3. La logística y la demanda</h2>
+  <p>Llevar el carburante a zonas aisladas o poco pobladas cuesta más, y las estaciones que venden menos litros reparten sus costes fijos entre menos clientes.</p>
+  <h2>Ranking completo</h2>
+  <p>Consulta el <a href="/gasolineras/">ranking de las 52 provincias</a>, actualizado a diario, o busca <a href="/buscador/">las gasolineras más baratas cerca de ti</a>.</p>
+</Guia>

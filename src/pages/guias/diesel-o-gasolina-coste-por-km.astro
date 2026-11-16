@@ -1,0 +1,40 @@
+---
+import Guia from '../../components/Guia.astro';
+import { nacional, eur } from '../../lib/datos.mjs';
+const pGa = +nacional.stats.ga.media.toFixed(3), pG95 = +nacional.stats.g95.media.toFixed(3);
+const kmD = (5.0 * pGa) / 100, kmG = (6.5 * pG95) / 100;
+---
+<Guia slug="diesel-o-gasolina-coste-por-km" conDatos fuentes={[
+  ['Precios medios: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+  ['Ley 7/2021, de cambio climático y transición energética, art. 14 (zonas de bajas emisiones)', 'https://www.boe.es/buscar/act.php?id=BOE-A-2021-8447'],
+  ['DGT: distintivos ambientales', 'https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/'],
+]}>
+  <p>Para comparar un diésel con un gasolina no basta con mirar el precio del litro: lo que importa es <strong>cuánto cuesta cada kilómetro</strong>, que depende también de lo que gasta cada coche. Hoy el gasóleo A cuesta de media {eur(pGa)}/l y la gasolina 95, {eur(pG95)}/l.</p>
+  <h2>La fórmula</h2>
+  <p><strong>Coste por km = consumo (litros/100 km) × precio del litro ÷ 100</strong></p>
+  <p>Ejemplo con dos coches hipotéticos: un diésel que gasta 5,0 l/100 km cuesta {eur(kmD, 4)} por km, y un gasolina que gasta 6,5 l/100 km cuesta {eur(kmG, 4)} por km. En 15.000 km al año, la diferencia es de unos <strong>{Math.abs((kmG - kmD) * 15000).toFixed(0)} €</strong> a favor del {kmD < kmG ? 'diésel' : 'gasolina'}. Con otros consumos el resultado cambia: prueba con los de tu coche.</p>
+  <section class="herramienta" id="ckm">
+    <h2 style="margin-top:0">Calculadora de coste por kilómetro</h2>
+    <label>Consumo del diésel (l/100 km) <input name="cd" type="number" step="0.1" min="1" max="30" value="5.0" /></label>
+    <label>Precio del diésel (€/l) <input name="pd" type="number" step="0.001" min="0.3" max="5" value={pGa} /></label>
+    <label>Consumo del gasolina (l/100 km) <input name="cg" type="number" step="0.1" min="1" max="30" value="6.5" /></label>
+    <label>Precio de la gasolina (€/l) <input name="pg" type="number" step="0.001" min="0.3" max="5" value={pG95} /></label>
+    <label>Kilómetros al año <input name="km" type="number" step="500" min="100" max="200000" value="15000" /></label>
+    <output aria-live="polite"></output>
+  </section>
+  <script is:inline>
+    (() => { const s = document.getElementById('ckm'), v = (n) => +s.querySelector(`[name=${n}]`).value, o = s.querySelector('output');
+      const f = () => { const d = v('cd') * v('pd') / 100, g = v('cg') * v('pg') / 100, k = v('km');
+        if (!(d > 0 && g > 0 && k > 0)) { o.textContent = 'Revisa los datos.'; return; }
+        const e = (x) => x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+        o.innerHTML = `Diésel: <strong>${(d * 100).toFixed(2).replace('.', ',')} cént./km</strong> (${e(d * k)} al año). Gasolina: <strong>${(g * 100).toFixed(2).replace('.', ',')} cént./km</strong> (${e(g * k)} al año). Diferencia: <strong>${e(Math.abs(g - d) * k)} al año</strong> a favor del ${d < g ? 'diésel' : 'gasolina'}.`; };
+      s.addEventListener('input', f); f(); })();
+  </script>
+  <h2>Lo que la calculadora no incluye</h2>
+  <ul>
+    <li><strong>Precio de compra</strong>: a igualdad de modelo, la versión diésel suele ser más cara, y esa diferencia tarda en compensarse si haces pocos kilómetros.</li>
+    <li><strong>Mantenimiento</strong>: los diésel modernos llevan filtro de partículas y, muchos, AdBlue, con costes propios.</li>
+    <li><strong>Etiqueta ambiental</strong>: según la DGT, un turismo de gasolina consigue la etiqueta C desde la norma Euro 4, mientras que un diésel necesita Euro 6. Importa porque la Ley 7/2021 obliga a los municipios de más de 50.000 habitantes a establecer zonas de bajas emisiones, que pueden limitar el acceso según la etiqueta. Comprueba la de tu coche por matrícula en la web de la DGT.</li>
+  </ul>
+  <p>Regla general: el diésel compensa más cuantos más kilómetros haces, sobre todo en carretera. Para pocos kilómetros y en ciudad, la gasolina (o un híbrido) suele salir mejor.</p>
+</Guia>

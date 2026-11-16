@@ -1,0 +1,50 @@
+---
+import Guia from '../../components/Guia.astro';
+import { estaciones, stats, eur } from '../../lib/datos.mjs';
+// Ley 38/1992, art. 50.1, tarifa 1.ª (tipo general + tipo especial), en €/litro
+const IEH = { g95: (400.69 + 72) / 1000, g98: (431.92 + 72) / 1000, ga: (307 + 72) / 1000 };
+const fuera = new Set(['35', '38', '51', '52']); // Canarias, Ceuta y Melilla: sin IVA ni IEH estatal
+const s = stats(estaciones.filter((e) => !fuera.has(e.p)));
+const filas = ['g95', 'ga', 'g98'].map((f) => {
+  const p = s[f].media, sinIva = p / 1.21, iva = p - sinIva, ieh = IEH[f];
+  return { f, p, iva, ieh, resto: sinIva - ieh, pct: ((iva + ieh) / p) * 100 };
+});
+const [g95, ga] = filas;
+const nombres = { g95: 'Gasolina 95', ga: 'Gasóleo A', g98: 'Gasolina 98' };
+const c = (x) => (x * 100).toFixed(1).replace('.', ',');
+---
+<Guia slug="impuestos-gasolina-diesel" conDatos fuentes={[
+  ['Ley 38/1992, de Impuestos Especiales, art. 50 (texto consolidado, BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['Ley 37/1992, del IVA (tipo general del 21 %, art. 90)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740'],
+  ['Precios: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+]}>
+  <p>Cuando pagas un litro de gasolina 95 en la Península o en Baleares, hoy de media <strong>{eur(g95.p)}</strong>, alrededor del <strong>{g95.pct.toFixed(0)} %</strong> son impuestos. En el diésel, a {eur(ga.p)} el litro, los impuestos son aproximadamente el {ga.pct.toFixed(0)} %. Te explicamos de dónde sale esa cifra con los precios de hoy.</p>
+  <h2>Los dos impuestos del carburante</h2>
+  <p><strong>1. El Impuesto sobre Hidrocarburos.</strong> Es un impuesto especial que se paga por litro, no en porcentaje. La Ley 38/1992 (artículo 50) fija para cada producto un tipo general y un tipo especial, que se suman:</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Producto (epígrafe)</th><th class="n">Tipo general</th><th class="n">Tipo especial</th><th class="n">Total por litro</th></tr></thead>
+    <tbody>
+      <tr><td>Gasolina sin plomo 98 o más (1.2.1)</td><td class="n">431,92 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,50392 €</td></tr>
+      <tr><td>Resto de gasolinas sin plomo, como la 95 (1.2.2)</td><td class="n">400,69 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,47269 €</td></tr>
+      <tr><td>Gasóleo de uso general (1.3)</td><td class="n">307 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,379 €</td></tr>
+      <tr><td>Gasóleo bonificado, «gasóleo B» (1.4)</td><td class="n">78,71 €/1.000 l</td><td class="n">18 €/1.000 l</td><td class="n">0,09671 €</td></tr>
+    </tbody>
+  </table></div>
+  <p><strong>2. El IVA</strong>, al tipo general del 21 %. Ojo: el IVA se calcula sobre el precio que ya incluye el impuesto sobre hidrocarburos, así que también se paga IVA sobre ese impuesto.</p>
+  <h2>Desglose de un litro con los precios de hoy</h2>
+  <p>Media de las gasolineras de la Península y Baleares (sin Canarias, Ceuta ni Melilla):</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Carburante</th><th class="n">Precio medio</th><th class="n">IVA (21 %)</th><th class="n">Imp. hidrocarburos</th><th class="n">Producto, logística y margen</th><th class="n">% impuestos</th></tr></thead>
+    <tbody>{filas.map((r) => <tr><td>{nombres[r.f]}</td><td class="n">{eur(r.p)}</td><td class="n">{eur(r.iva)}</td><td class="n">{eur(r.ieh)}</td><td class="n">{eur(r.resto)}</td><td class="n">{r.pct.toFixed(1).replace('.', ',')} %</td></tr>)}</tbody>
+  </table></div>
+  <p>Cómo se calcula: el IVA es el precio menos el precio dividido entre 1,21. El impuesto sobre hidrocarburos es la cantidad fija de la tabla anterior. Lo que queda es lo que cobran la petrolera y la gasolinera por el producto (incluidos los biocarburantes obligatorios), el transporte, el almacenamiento y su margen.</p>
+  <h2>Tres consecuencias prácticas</h2>
+  <ul>
+    <li><strong>Cuando el carburante baja, el peso de los impuestos sube.</strong> Como el impuesto sobre hidrocarburos es fijo por litro, si el precio cae, ese impuesto pesa más sobre el total (y al revés).</li>
+    <li><strong>El diésel paga menos impuesto especial que la gasolina</strong>: {c(IEH.g95 - IEH.ga)} céntimos menos por litro que la gasolina 95, y con IVA, {c((IEH.g95 - IEH.ga) * 1.21)} céntimos.</li>
+    <li><strong>Parte de lo que cuesta de más la 98 son impuestos</strong>: paga {c(IEH.g98 - IEH.g95)} céntimos más de impuesto especial por litro que la 95 ({c((IEH.g98 - IEH.g95) * 1.21)} céntimos con IVA). Lo explicamos en <a href="/guias/gasolina-95-o-98/">gasolina 95 o 98</a>.</li>
+  </ul>
+  <h2>¿Y en Canarias, Ceuta y Melilla?</h2>
+  <p>Allí no se aplican ni el IVA ni el impuesto sobre hidrocarburos estatal: tienen tributos propios. Por eso sus precios medios suelen ser los más bajos del <a href="/gasolineras/">ranking de provincias</a> y no conviene compararlos directamente con los de la Península.</p>
+  <p><small>Los tipos se han comprobado en el texto consolidado del BOE el 16 de noviembre de 2026. Si la ley cambia, actualizaremos esta guía.</small></p>
+</Guia>

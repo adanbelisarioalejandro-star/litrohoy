@@ -1,0 +1,31 @@
+---
+import Guia from '../../components/Guia.astro';
+import { estaciones, media, eur } from '../../lib/datos.mjs';
+// Diferencia 98-95 en la MISMA gasolinera (comparación justa)
+const ambas = estaciones.filter((e) => e.g95 && e.g98);
+const difs = ambas.map((e) => e.g98 - e.g95).sort((a, b) => a - b);
+const mediana = difs[Math.floor(difs.length / 2)];
+const dMedia = media(difs);
+const impuesto = ((431.92 - 400.69) / 1000) * 1.21; // diferencia de impuesto especial + IVA (Ley 38/1992, art. 50)
+const litros = 15000 * 6.5 / 100;
+---
+<Guia slug="gasolina-95-o-98" conDatos fuentes={[
+  ['Ley 38/1992, de Impuestos Especiales, art. 50, epígrafes 1.2.1 y 1.2.2 (BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+]}>
+  <p>La gasolina 98 cuesta hoy de media <strong>{eur(dMedia)} más por litro</strong> que la 95 en la misma gasolinera (la diferencia más habitual es de {eur(mediana)}), según los precios de las {ambas.length.toLocaleString('es-ES')} estaciones que venden las dos. ¿Merece la pena pagarlo?</p>
+  <h2>Qué significa 95 y 98</h2>
+  <p>El número es el <strong>octanaje</strong> (índice de octano RON): mide la resistencia de la gasolina a detonar antes de tiempo dentro del cilindro (el «picado de bielas»). Un octanaje mayor no significa que la gasolina tenga más energía, sino que aguanta más compresión sin autoencenderse.</p>
+  <h2>Cuándo compensa la 98</h2>
+  <ul>
+    <li><strong>Si el fabricante la exige o la recomienda</strong>: algunos motores de altas prestaciones o muy comprimidos están pensados para 98. Lo verás en el manual o en la tapa del depósito. En ese caso, úsala.</li>
+    <li><strong>Si el manual indica 95</strong>, la 98 no aporta una ventaja apreciable en la mayoría de los coches: el motor está ajustado para 95 y pagas más por algo que no aprovecha.</li>
+    <li>Repostar 98 en un coche de 95 no daña el motor. Lo contrario (95 en un coche que exige 98) sí puede reducir el rendimiento, y en casos extremos provocar detonaciones.</li>
+  </ul>
+  <h2>Cuánto cuesta de más al año</h2>
+  <p>Con 15.000 km al año y un consumo de 6,5 litros cada 100 km ({litros.toLocaleString('es-ES')} litros), usar 98 en lugar de 95 cuesta hoy unos <strong>{(dMedia * litros).toFixed(0)} € más al año</strong>.</p>
+  <h2>Parte de la diferencia son impuestos</h2>
+  <p>La ley grava más la gasolina de 98 octanos: 431,92 € de tipo general por cada 1.000 litros frente a 400,69 € de la 95 (el tipo especial de 72 € es igual para las dos). Con el IVA, eso supone {(impuesto * 100).toFixed(2).replace('.', ',')} céntimos más por litro solo en impuestos. El resto de la diferencia corresponde al producto y al margen de cada estación. Más detalle en <a href="/guias/impuestos-gasolina-diesel/">cuántos impuestos pagas por cada litro</a>.</p>
+  <h2>¿Y la etiqueta E5 o E10?</h2>
+  <p>Es otra cosa: indica el porcentaje máximo de bioetanol. Lo explicamos en <a href="/guias/etiquetas-combustible-e5-e10-b7/">qué significan E5, E10 y B7</a>.</p>
+</Guia>

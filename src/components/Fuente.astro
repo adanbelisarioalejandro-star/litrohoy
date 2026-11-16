@@ -1,6 +1,8 @@
 ---
 import { FUENTE, FUENTE_URL, FECHA, ACTUALIZADO, fechaLarga } from '../lib/datos.mjs';
-const hora = ACTUALIZADO.split(' ')[1]?.slice(0, 5);
+// '16/11/2026 2:19:02' -> '02:19'
+const hm = ACTUALIZADO.split(' ')[1]?.split(':');
+const hora = hm?.length >= 2 ? `${hm[0].padStart(2, '0')}:${hm[1]}` : null;
 ---
 <p class="fuente">
   <strong>Fuente:</strong> <a href={FUENTE_URL} rel="nofollow noopener" target="_blank">{FUENTE}</a>.

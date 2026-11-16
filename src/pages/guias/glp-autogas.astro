@@ -1,0 +1,37 @@
+---
+import Guia from '../../components/Guia.astro';
+import { estaciones, nacional, provincias, eur } from '../../lib/datos.mjs';
+const sG = nacional.stats.glp, s95 = nacional.stats.g95;
+const top = provincias.filter((p) => p.stats.glp).map((p) => [p, p.stats.glp.n]).sort((a, b) => b[1] - a[1]).slice(0, 6);
+---
+<Guia slug="glp-autogas" conDatos fuentes={[
+  ['DGT: etiqueta ambiental ECO', 'https://www.dgt.es/nuestros-servicios/tu-vehiculo/tus-vehiculos/distintivo-ambiental/etiqueta-eco/'],
+  ['Ley 38/1992, de Impuestos Especiales, art. 50, epígrafe 1.6 (BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+]}>
+  <p>El GLP o autogás (gas licuado del petróleo, una mezcla de propano y butano) cuesta hoy de media <strong>{eur(sG.media)}/l</strong>, frente a {eur(s95.media)}/l de la gasolina 95: un {(((s95.media - sG.media) / s95.media) * 100).toFixed(0)} % menos por litro. Lo venden {sG.n.toLocaleString('es-ES')} de las {estaciones.length.toLocaleString('es-ES')} gasolineras con precio publicado.</p>
+  <h2>Por qué es más barato</h2>
+  <p>Sobre todo por los impuestos. El GLP de uso general paga 57,47 € <strong>por tonelada</strong> de impuesto sobre hidrocarburos (epígrafe 1.6 de la Ley 38/1992), mucho menos que los 472,69 € <strong>por cada 1.000 litros</strong> de la gasolina 95.</p>
+  <h2>El ahorro real: ojo con el consumo</h2>
+  <p>Un coche gasta más litros de GLP que de gasolina para recorrer la misma distancia, porque el GLP tiene menos energía por litro. El aumento depende del motor y del sistema, así que mira el dato homologado de tu modelo. Con la calculadora puedes ver si te compensa:</p>
+  <section class="herramienta" id="glp">
+    <label>Consumo con gasolina (l/100 km) <input name="cg" type="number" step="0.1" value="6.5" /></label>
+    <label>Consumo con GLP (l/100 km) <input name="cl" type="number" step="0.1" value="8.0" /></label>
+    <label>Precio gasolina (€/l) <input name="pg" type="number" step="0.001" value={s95.media.toFixed(3)} /></label>
+    <label>Precio GLP (€/l) <input name="pl" type="number" step="0.001" value={sG.media.toFixed(3)} /></label>
+    <label>Km al año <input name="km" type="number" step="500" value="15000" /></label>
+    <output aria-live="polite"></output>
+  </section>
+  <script is:inline>
+    (() => { const s = document.getElementById('glp'), v = (n) => +s.querySelector(`[name=${n}]`).value, o = s.querySelector('output');
+      const e = (x) => x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+      const f = () => { const g = v('cg') * v('pg') / 100 * v('km'), l = v('cl') * v('pl') / 100 * v('km');
+        o.innerHTML = g > 0 && l > 0 ? `Gasolina: ${e(g)} al año. GLP: ${e(l)} al año. <strong>${g > l ? 'Ahorro' : 'Sobrecoste'} con GLP: ${e(Math.abs(g - l))} al año.</strong>` : 'Revisa los datos.'; };
+      s.addEventListener('input', f); f(); })();
+  </script>
+  <p><small>Los valores iniciales de consumo son un ejemplo; cámbialos por los de tu coche. Los coches de GLP suelen ser bifuel: también llevan depósito de gasolina.</small></p>
+  <h2>Etiqueta ECO</h2>
+  <p>Según la DGT, los turismos propulsados por GLP pueden obtener la etiqueta ECO si, además, cumplen el nivel de emisiones exigido para la etiqueta C (Euro 4, 5 o 6 en gasolina). Esta etiqueta da ventajas de acceso y aparcamiento en muchas zonas de bajas emisiones. Comprueba la de tu coche por matrícula en la web de la DGT.</p>
+  <h2>Dónde repostar</h2>
+  <p>No todas las gasolineras tienen GLP. Usa el <a href="/buscador/">buscador</a> eligiendo «GLP / autogás» para ver las más cercanas y baratas. Provincias con más puntos de venta hoy: {top.map(([p, n], i) => <>{i > 0 && ', '}<a href={p.url}>{p.nombre}</a> ({n})</>)}.</p>
+</Guia>

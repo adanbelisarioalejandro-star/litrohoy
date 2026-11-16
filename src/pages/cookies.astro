@@ -1,0 +1,31 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+---
+<Base title="Política de cookies | LitroHoy" description="Qué cookies usa LitroHoy: ninguna propia; cookies publicitarias de Google solo con tu consentimiento. Cómo configurarlas o retirarlas.">
+  <Migas items={[['Política de cookies', '/cookies/']]} />
+  <article class="guia">
+    <h1>Política de cookies</h1>
+    <p>Esta política cumple el artículo 22.2 de la LSSI-CE y sigue la Guía sobre el uso de las cookies de la Agencia Española de Protección de Datos.</p>
+    <h2>¿Qué son las cookies?</h2>
+    <p>Son pequeños archivos que un sitio web guarda en tu navegador para recordar información sobre tu visita. Existen tecnologías parecidas (almacenamiento local, identificadores) a las que se aplica lo mismo.</p>
+    <h2>Cookies propias</h2>
+    <p><strong>LitroHoy no instala cookies propias</strong> ni usa herramientas de analítica con cookies.</p>
+    <h2>Cookies de terceros: publicidad (Google AdSense)</h2>
+    <p>Cuando el sitio muestra anuncios, Google puede usar cookies con estas finalidades:</p>
+    <div class="tabla"><table>
+      <thead><tr><th>Proveedor</th><th>Finalidad</th><th>Cuándo</th><th>Más información</th></tr></thead>
+      <tbody>
+        <tr><td>Google (AdSense) y sus socios publicitarios</td><td>Mostrar anuncios, limitar las veces que ves cada uno, medir su rendimiento, prevenir el fraude y, si lo aceptas, personalizar los anuncios</td><td>Solo después de que lo autorices en el mensaje de consentimiento</td><td><a href="https://policies.google.com/technologies/ads?hl=es" rel="nofollow noopener" target="_blank">Cómo usa Google las cookies publicitarias</a></td></tr>
+        <tr><td>Google (plataforma de gestión del consentimiento)</td><td>Guardar tus preferencias de consentimiento</td><td>Cuando respondes al mensaje de consentimiento (técnica, necesaria)</td><td><a href="https://policies.google.com/privacy?hl=es" rel="nofollow noopener" target="_blank">Política de privacidad de Google</a></td></tr>
+      </tbody>
+    </table></div>
+    <p>El mensaje de consentimiento lo gestiona una plataforma certificada por Google e integrada en el Marco de Transparencia y Consentimiento (TCF) de IAB Europe. Puedes aceptar, rechazar o elegir por finalidades y proveedores. Rechazar es tan fácil como aceptar.</p>
+    <h2>Cómo cambiar o retirar tu consentimiento</h2>
+    <ul>
+      <li>Usa el enlace <strong>«Configurar privacidad»</strong> del pie de página (aparece cuando el sitio muestra publicidad).</li>
+      <li>También puedes borrar o bloquear las cookies desde tu navegador: <a href="https://support.google.com/chrome/answer/95647?hl=es" rel="nofollow noopener" target="_blank">Chrome</a>, <a href="https://support.mozilla.org/es/kb/Borrar%20cookies" rel="nofollow noopener" target="_blank">Firefox</a>, <a href="https://support.apple.com/es-es/guide/safari/sfri11471/mac" rel="nofollow noopener" target="_blank">Safari</a>, <a href="https://support.microsoft.com/es-es/microsoft-edge" rel="nofollow noopener" target="_blank">Edge</a>.</li>
+    </ul>
+    <p>Última actualización: 16 de noviembre de 2026. Más detalles en la <a href="/privacidad/">política de privacidad</a>.</p>
+  </article>
+</Base>

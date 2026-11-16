@@ -7,6 +7,7 @@ export const CARBURANTES = {
   g98: { campo: 'Precio Gasolina 98 E5', nombre: 'Gasolina 98' },
   gp: { campo: 'Precio Gasoleo Premium', nombre: 'Diésel premium' },
   glp: { campo: 'Precio Gases licuados del petróleo', nombre: 'GLP / autogás' },
+  gb: { campo: 'Precio Gasoleo B', nombre: 'Gasóleo B (agrícola)' },
 };
 const CLAVES = Object.keys(CARBURANTES);
 const OBLIGATORIOS = ['IDEESS', 'IDMunicipio', 'Municipio', 'IDProvincia', 'Provincia', 'IDCCAA', 'Rótulo',

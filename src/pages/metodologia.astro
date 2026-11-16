@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Fuente from '../components/Fuente.astro';
+import { MIN_ESTACIONES, MIN_DIAS_HISTORICO, MIN_ESTACIONES_MARCA, FECHAS_HIST, fechaLarga } from '../lib/datos.mjs';
+---
+<Base title="Metodología: cómo calculamos los precios medios | LitroHoy" description="Fuente de los datos, frecuencia de actualización, cálculo de medias y variaciones, criterios de calidad y limitaciones de LitroHoy.">
+  <Migas items={[['Metodología', '/metodologia/']]} />
+  <article class="guia">
+    <h1>Metodología</h1>
+    <h2>Fuente</h2>
+    <p>Usamos el servicio REST de precios de carburantes del Ministerio para la Transición Ecológica y el Reto Demográfico, con el listado de estaciones terrestres y su histórico por fecha. Son precios por litro con todos los impuestos incluidos, tal como los comunica cada estación.</p>
+    <h2>Actualización</h2>
+    <p>Un proceso automático descarga los datos una vez al día. Antes de publicarlos comprueba que la fuente mantiene sus campos, que hay un número normal de estaciones y que los precios están en un rango razonable. Si algo falla, no se publican datos dudosos: se mantienen los del día anterior y se revisa el problema.</p>
+    <h2>Medias y variaciones</h2>
+    <ul>
+      <li><strong>Media de un municipio</strong>: media simple de los precios de las estaciones de ese municipio que venden ese carburante.</li>
+      <li><strong>Media provincial, autonómica y nacional</strong>: media de todas las estaciones de la zona (cada estación cuenta lo mismo).</li>
+      <li><strong>Variación a 7, 30 días o un año</strong>: diferencia porcentual entre la media de hoy y la del día equivalente del histórico. Si no tenemos un dato cercano a esa fecha, no mostramos la variación.</li>
+      <li><strong>Histórico</strong>: tenemos {FECHAS_HIST.length} días desde el {fechaLarga(FECHAS_HIST[0])}. Los meses antiguos tienen un punto al mes (día 1) y los últimos 90 días, un punto diario.</li>
+    </ul>
+    <h2>Criterios de calidad</h2>
+    <p>Solo publicamos una página de municipio cuando aporta información útil: al menos {MIN_ESTACIONES} gasolineras con precio y {MIN_DIAS_HISTORICO} días de histórico. Las marcas tienen página propia si cuentan con al menos {MIN_ESTACIONES_MARCA} estaciones. Antes de cada publicación, un control automático descarta las páginas con datos insuficientes o casi idénticas a otra.</p>
+    <h2>Limitaciones</h2>
+    <ul>
+      <li>Los precios pueden cambiar varias veces al día; manda el que marca el surtidor.</li>
+      <li>Algunas estaciones no comunican todos sus carburantes o lo hacen con retraso.</li>
+      <li>La media de una marca depende de en qué provincias tiene más estaciones; compárala con la media de cada provincia (lo indicamos en su página).</li>
+      <li>En Canarias, Ceuta y Melilla la fiscalidad de los carburantes es distinta, y eso influye en las comparaciones nacionales.</li>
+    </ul>
+    <Fuente />
+  </article>
+</Base>

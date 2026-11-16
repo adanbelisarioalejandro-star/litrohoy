@@ -1,0 +1,11 @@
+---
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import { GUIAS } from '../../lib/guias.mjs';
+---
+<Base title="Guías para ahorrar en gasolina y diésel | LitroHoy" description="Guías con datos oficiales: impuestos de los carburantes, mejor día para repostar, low cost frente a marcas, gasolina 95 o 98, GLP, gasóleo B y más.">
+  <Migas items={[['Guías', '/guias/']]} />
+  <h1>Guías sobre carburantes</h1>
+  <p>Explicaciones claras y comprobadas contra fuentes oficiales (BOE, Ministerio, DGT, IDAE). Las guías con cifras de precios se recalculan cada día con los datos del Ministerio.</p>
+  <ul style="list-style:none;padding:0">{GUIAS.map((g) => <li style="margin-bottom:1rem"><a href={`/guias/${g.slug}/`}><strong>{g.titulo}</strong></a><br /><small>{g.descripcion}</small></li>)}</ul>
+</Base>

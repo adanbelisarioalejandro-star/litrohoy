@@ -1,0 +1,32 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+---
+<Base title="Aviso legal | LitroHoy" description="Aviso legal de LitroHoy: titular del sitio, condiciones de uso, propiedad intelectual, origen de los datos y responsabilidad.">
+  <Migas items={[['Aviso legal', '/aviso-legal/']]} />
+  <article class="guia">
+    <h1>Aviso legal</h1>
+    <h2>1. Titular del sitio web</h2>
+    <p>En cumplimiento del artículo 10 de la Ley 34/2002, de servicios de la sociedad de la información y de comercio electrónico (LSSI-CE), se informa de los datos del titular de este sitio web:</p>
+    <ul>
+      <li>Titular: [RELLENAR: nombre y apellidos o razón social]</li>
+      <li>NIF/NIE: [RELLENAR]</li>
+      <li>Domicilio: [RELLENAR]</li>
+      <li>Correo electrónico de contacto: [RELLENAR]</li>
+      <li>Sitio web: LitroHoy ({Astro.site?.host})</li>
+    </ul>
+    <h2>2. Objeto</h2>
+    <p>LitroHoy es un sitio informativo y gratuito que muestra los precios de los carburantes en las estaciones de servicio de España, junto con medias, comparativas, evoluciones históricas y guías. El acceso no requiere registro.</p>
+    <h2>3. Origen de los datos</h2>
+    <p>Los precios proceden del servicio público de datos del Ministerio para la Transición Ecológica y el Reto Demográfico (Geoportal de Hidrocarburos), al que las propias estaciones de servicio comunican sus precios. Se reutilizan conforme a la Ley 37/2007, sobre reutilización de la información del sector público, citando la fuente y la fecha de actualización. LitroHoy no tiene relación con el Ministerio ni con las empresas o marcas mencionadas; las marcas citadas pertenecen a sus titulares y se nombran solo para identificar las estaciones.</p>
+    <h2>4. Responsabilidad</h2>
+    <p>Los datos se actualizan a diario de forma automática, pero los precios pueden variar a lo largo del día y la fuente puede contener errores u omisiones. El precio que vale es siempre el que marca el surtidor. LitroHoy no se hace responsable de decisiones tomadas a partir de la información publicada ni de los contenidos de sitios externos enlazados.</p>
+    <h2>5. Propiedad intelectual</h2>
+    <p>Los textos, gráficos, diseño y código propios de este sitio son del titular. Los datos de precios son información pública. Puedes citar o enlazar nuestras páginas indicando la fuente.</p>
+    <h2>6. Publicidad</h2>
+    <p>Este sitio se financia con publicidad mostrada por Google AdSense. Los anuncios se identifican con la palabra «Publicidad» y no influyen en el orden de las gasolineras, que siempre se ordenan por precio.</p>
+    <h2>7. Legislación aplicable</h2>
+    <p>Este aviso se rige por la legislación española. Para cualquier controversia, las partes se someten a los juzgados y tribunales que correspondan conforme a la normativa vigente, incluida la de consumidores y usuarios.</p>
+    <p><small>Consulta también la <a href="/privacidad/">política de privacidad</a> y la <a href="/cookies/">política de cookies</a>.</small></p>
+  </article>
+</Base>

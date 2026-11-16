@@ -1,0 +1,40 @@
+---
+import Guia from '../../components/Guia.astro';
+import { nacional } from '../../lib/datos.mjs';
+const p = nacional.stats.ga.media.toFixed(3);
+---
+<Guia slug="calcular-consumo-real" fuentes={[['IDAE: Manual de conducción eficiente', 'https://www.idae.es/uploads/documentos/documentos_10297_TREATISE_ConduccionEficiente_2005_ff845d19.pdf']]}>
+  <p>El consumo que indica el ordenador de a bordo es una estimación, y el homologado se mide en condiciones de laboratorio. Para saber cuánto gasta de verdad tu coche, el método más fiable es el del <strong>depósito lleno</strong>.</p>
+  <h2>El método del depósito lleno, paso a paso</h2>
+  <ol>
+    <li>Llena el depósito hasta que salte el surtidor (no sigas echando después).</li>
+    <li>Pon a cero el cuentakilómetros parcial (trip).</li>
+    <li>Conduce con normalidad. Cuanto más tiempo, mejor: al menos medio depósito.</li>
+    <li>Vuelve a llenar <strong>en el mismo surtidor si puedes</strong>, también hasta el primer salto, y apunta los litros que entran.</li>
+    <li>Calcula: <strong>consumo (l/100 km) = litros repostados ÷ kilómetros recorridos × 100</strong>.</li>
+  </ol>
+  <p>Ejemplo: si recorres 612 km y al volver a llenar entran 38,4 litros, el consumo es 38,4 ÷ 612 × 100 = 6,27 l/100 km.</p>
+  <section class="herramienta" id="cons">
+    <h2 style="margin-top:0">Calculadora de consumo</h2>
+    <label>Kilómetros recorridos <input name="km" type="number" step="1" value="612" /></label>
+    <label>Litros repostados <input name="l" type="number" step="0.01" value="38.4" /></label>
+    <label>Precio pagado (€/l) <input name="p" type="number" step="0.001" value={p} /></label>
+    <output aria-live="polite"></output>
+  </section>
+  <script is:inline>
+    (() => { const s = document.getElementById('cons'), v = (n) => +s.querySelector(`[name=${n}]`).value, o = s.querySelector('output');
+      const f = () => { const km = v('km'), l = v('l'), p = v('p');
+        if (!(km > 0 && l > 0)) { o.textContent = 'Introduce kilómetros y litros.'; return; }
+        const c = l / km * 100;
+        o.innerHTML = `Consumo real: <strong>${c.toFixed(2).replace('.', ',')} l/100 km</strong>` + (p > 0 ? ` · Coste: <strong>${(c * p).toFixed(2).replace('.', ',')} € cada 100 km</strong> (${(c * p / 100 * 100).toFixed(1).replace('.', ',')} céntimos por km)` : ''); };
+      s.addEventListener('input', f); f(); })();
+  </script>
+  <h2>Consejos para que la medida sea fiable</h2>
+  <ul>
+    <li>Repite la medición varias veces y haz la media: un solo depósito puede salir alto por un atasco o bajo por un viaje largo por autovía.</li>
+    <li>Llena siempre igual (hasta el primer salto) y, si puedes, en la misma gasolinera.</li>
+    <li>Apunta por separado los trayectos urbanos y los de carretera: el consumo cambia mucho.</li>
+  </ul>
+  <h2>Si gastas más de lo que deberías</h2>
+  <p>Revisa la presión de los neumáticos: según el IDAE, circular con 0,3 bares menos de lo recomendado aumenta el consumo en torno a un 3 %. Más ideas en <a href="/guias/trucos-ahorrar-carburante/">cómo gastar menos en carburante</a>. Y con el consumo real puedes comparar el coste por kilómetro en la <a href="/guias/diesel-o-gasolina-coste-por-km/">calculadora diésel o gasolina</a>.</p>
+</Guia>

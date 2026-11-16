@@ -1,0 +1,37 @@
+---
+import Guia from '../../components/Guia.astro';
+import { municipios, media } from '../../lib/datos.mjs';
+const grandes = municipios.filter((m) => m.stats.ga?.n >= 5);
+const disp = media(grandes.map((m) => (m.stats.ga.max - m.stats.ga.min) * 100));
+const ahorro = (disp / 100) * 50 * 3 * 12;
+---
+<Guia slug="trucos-ahorrar-carburante" conDatos fuentes={[
+  ['IDAE: Manual de conducción eficiente (2005)', 'https://www.idae.es/uploads/documentos/documentos_10297_TREATISE_ConduccionEficiente_2005_ff845d19.pdf'],
+  ['IDAE: folleto de beneficios de la conducción eficiente', 'https://www.idae.es/uploads/documentos/documentos_Folleto_conducci_n_final_fb377d0f.pdf'],
+  ['DGT: conducción eficiente', 'https://www.dgt.es/muevete-con-seguridad/conviertete-en-un-buen-conductor/consejos-generales/conduccion-eficiente/'],
+  ['Revista DGT: cómo ahorrar conduciendo (2022)', 'https://revista.dgt.es/es/motor/reportajes/2022/0629-Como-ahorrar-conduciendo.shtml'],
+  ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+]}>
+  <p>Hay dos formas de gastar menos en carburante: pagar menos por cada litro y gastar menos litros. Estas son las que de verdad funcionan, con cifras de fuentes oficiales.</p>
+  <h2>1. Elige bien la gasolinera (el ahorro más fácil)</h2>
+  <p>En los {grandes.length} municipios con cinco o más gasolineras, la diferencia media entre la más barata y la más cara para el diésel es hoy de <strong>{disp.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Con 3 depósitos de 50 litros al mes, eso son unos <strong>{ahorro.toFixed(0)} € al año</strong>. Busca la tuya en la página de tu <a href="/gasolineras/">municipio o provincia</a> o con el <a href="/buscador/">buscador por cercanía</a>.</p>
+  <p>Lo que no merece la pena: hacer muchos kilómetros extra para ahorrar unos céntimos, ni obsesionarse con el día de la semana (lo analizamos en <a href="/guias/mejor-dia-para-repostar/">¿qué día es más barato repostar?</a>).</p>
+  <h2>2. Conducción eficiente: entre un 10 y un 25 % menos</h2>
+  <p>Según el IDAE, conducir de forma eficiente puede ahorrar entre un 10 % y un 25 % de combustible. Las claves:</p>
+  <ul>
+    <li><strong>Usa marchas largas.</strong> El IDAE calcula que circular en 5.ª en lugar de en 3.ª a la misma velocidad ahorra alrededor de un 15 % en coches pequeños y hasta un 20 % en los grandes.</li>
+    <li><strong>Anticípate al tráfico</strong>: evita los acelerones y los frenazos y aprovecha la inercia levantando el pie con la marcha engranada.</li>
+    <li><strong>Mantén una velocidad uniforme</strong>: el consumo crece rápidamente con la velocidad por la resistencia del aire.</li>
+  </ul>
+  <h2>3. Neumáticos a la presión correcta</h2>
+  <p>El IDAE cifra en torno a un 3 % el aumento de consumo con 0,3 bares menos de lo recomendado, y aconseja revisar la presión al menos una vez al mes y en frío. La presión correcta está en el manual o en una etiqueta del coche, normalmente en el marco de la puerta o en la tapa del depósito.</p>
+  <h2>4. Menos peso y menos resistencia</h2>
+  <ul>
+    <li>Quita la baca o el cofre del techo cuando no los uses: aumentan la resistencia al aire.</li>
+    <li>No lleves peso innecesario en el maletero.</li>
+    <li>El aire acondicionado consume: úsalo con moderación. Ventilar con las ventanillas bajadas a velocidad alta también aumenta la resistencia.</li>
+  </ul>
+  <h2>5. Mantenimiento</h2>
+  <p>Un filtro de aire sucio, un aceite inadecuado o unas bujías desgastadas aumentan el consumo. Sigue el plan de mantenimiento del fabricante.</p>
+  <p>¿Quieres saber cuánto gasta tu coche de verdad? Usa la <a href="/guias/calcular-consumo-real/">calculadora de consumo real</a>.</p>
+</Guia>

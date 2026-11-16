@@ -31,6 +31,40 @@ const MENORES = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'y', 'a', 'en', 
 export const titulo = (s) => s.toLowerCase().replace(/[\p{L}\d.ºª]+/gu, (w, i) =>
   (i > 0 && MENORES.has(w)) ? w : w.charAt(0).toUpperCase() + w.slice(1)).replace(/\bKm\b/g, 'km');
 
+// Direcciones de la fuente (en mayúsculas y con abreviaturas): las normaliza para mostrarlas.
+const ABREV = { 'C/': 'Calle', CR: 'Ctra.', CTRA: 'Ctra.', 'CTRA.': 'Ctra.', CL: 'Calle', C: 'Calle', AV: 'Avda.', AVDA: 'Avda.', 'AVDA.': 'Avda.', PZ: 'Plaza', PZA: 'Plaza', PG: 'Pol.', POL: 'Pol.', 'POL.': 'Pol.', PS: 'Paseo', AU: 'Autovía', AUT: 'Autovía' };
+const VIA = /^(CALLE|CARRETERA|AVENIDA|PLAZA|PASEO|CAMINO|RONDA|TRAVESIA|TRAVESÍA|AUTOVIA|AUTOVÍA|POLIGONO|POLÍGONO|GLORIETA)$/;
+export function direccion(s) {
+  let w = s.toUpperCase().replace(/\s*,\s*/g, ', ').replace(/(\d), (\d)/g, '$1,$2').replace(/[\s,]+$/, '').replace(/\s+/g, ' ').trim().split(' ');
+  if (ABREV[w[0]]) w[0] = ABREV[w[0]];
+  // "CALLE CALLE DE ..." / "CALLE AVENIDA ..." -> se queda el segundo tipo de vía
+  if (w.length > 2 && (VIA.test(w[0]) || /^(Calle|Ctra\.|Avda\.|Plaza|Paseo)$/.test(w[0])) && VIA.test(w[1].replace(',', ''))) w = w.slice(1);
+  const out = w.map((t, i) => {
+    const limpio = t.replace(/,$/, '');
+    const coma = t.endsWith(',') ? ',' : '';
+    if (/^[A-Z]{1,3}-?\d+[A-Z]?$/.test(limpio) && /\d/.test(limpio) && limpio.includes('-')) return limpio + coma; // A-5, CM-332
+    if (/^[A-Z]{1,3}-[IVXL]+$/.test(limpio)) return limpio + coma; // N-III
+    if (limpio === 'S/N' || limpio === 'SN') return 's/n' + coma;
+    if (limpio === 'KM' || limpio === 'KM.') return 'km' + coma;
+    if (/^\d/.test(limpio) || /^[A-Z][a-z]+\.$/.test(limpio)) return t; // números, abreviaturas ya normalizadas
+    const lw = limpio.toLowerCase();
+    const siguiente = w[i + 1];
+    // letra suelta como nombre de calle ("CALLE E, 7") en mayúscula; conjunciones/preposiciones en minúscula
+    if (limpio.length === 1 && (coma || !siguiente || /^\d/.test(siguiente))) return limpio + coma;
+    if (i > 0 && MENORES.has(lw)) return lw + coma;
+    return lw.charAt(0).toUpperCase() + lw.slice(1) + coma;
+  });
+  return out.join(' ');
+}
+
+/** "la provincia de Sevilla", o el nombre de la comunidad si es uniprovincial ("la Comunidad de Madrid"). */
+export function refZona(p, ccaaNombre, uniprovincial) {
+  if (!uniprovincial) return `la provincia de ${p.nombre}`;
+  if (/^(Comunidad|Región|Comunitat)/.test(ccaaNombre)) return `la ${ccaaNombre}`;
+  if (ccaaNombre.startsWith('Illes')) return `las ${ccaaNombre}`;
+  return ccaaNombre;
+}
+
 /** Estadísticas por carburante de una lista de estaciones. */
 export function stats(lista) {
   const o = {};
@@ -93,8 +127,8 @@ export function variacion(serie, dias) {
   const obj = new Date(new Date(ultF).getTime() - dias * 864e5).toISOString().slice(0, 10);
   const prev = [...serie].reverse().find(([d]) => d <= obj);
   if (!prev) return null;
-  // si no hay un punto razonablemente cercano (±40 % del intervalo), no inventamos
-  if ((new Date(obj) - new Date(prev[0])) / 864e5 > Math.max(3, dias * 0.4)) return null;
+  // solo con un dato oficial de como mucho 3 días antes de la fecha objetivo; si no, no se muestra
+  if ((new Date(obj) - new Date(prev[0])) / 864e5 > 3) return null;
   return ((ultV - prev[1]) / prev[1]) * 100;
 }
 const diasDiarios = (serie) => ultimosDias(serie, 120).length;
@@ -122,6 +156,8 @@ export const comunidades = Object.entries(CCAA).map(([id, nombre]) => {
   return { id, nombre, slug: slug(nombre), url: `/comunidad/${slug(nombre)}/`, provs, est, stats: stats(est) };
 }).filter((c) => c.est.length);
 export const ccaaPorId = Object.fromEntries(comunidades.map((c) => [c.id, c]));
+// p.ref: cómo nombrar la zona de referencia en los textos ("la provincia de Sevilla" / "la Comunidad de Madrid")
+for (const p of provincias) { const c = ccaaPorId[p.ccaa]; p.ref = refZona(p, c.nombre, c.provs.length === 1); }
 
 const publicadas = json(`${D}/publicadas.json`, { municipios: {} }).municipios;
 export const retiradas = new Set(json(`${D}/retiradas.json`, []));

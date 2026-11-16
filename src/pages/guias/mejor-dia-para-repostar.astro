@@ -1,0 +1,44 @@
+---
+import Guia from '../../components/Guia.astro';
+import Grafico from '../../components/Grafico.astro';
+import { serieNacional, ultimosDias, municipios, media } from '../../lib/datos.mjs';
+const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
+// Desviación de cada día frente a la media móvil centrada de 7 días (quita la tendencia general), en céntimos
+function porDia(f) {
+  const s = ultimosDias(serieNacional(f), 90);
+  const acc = DIAS.map(() => []);
+  for (let i = 3; i < s.length - 3; i++) {
+    const mm = media(s.slice(i - 3, i + 4).map((p) => p[1]));
+    acc[new Date(s[i][0] + 'T12:00:00Z').getUTCDay()].push((s[i][1] - mm) * 100);
+  }
+  return { n: s.length, dias: acc.map((xs) => media(xs)) };
+}
+const ga = porDia('ga'), g95 = porDia('g95');
+const orden = [1, 2, 3, 4, 5, 6, 0];
+const mejor = orden.reduce((a, b) => (ga.dias[b] < ga.dias[a] ? b : a));
+const peor = orden.reduce((a, b) => (ga.dias[b] > ga.dias[a] ? b : a));
+const rango = ga.dias[peor] - ga.dias[mejor];
+// diferencia típica entre la gasolinera más cara y la más barata de un mismo municipio (5+ gasolineras)
+const dispersion = media(municipios.filter((m) => m.stats.ga?.n >= 5).map((m) => (m.stats.ga.max - m.stats.ga.min) * 100));
+const c = (x) => (x > 0 ? '+' : '') + x.toFixed(2).replace('.', ',');
+---
+<Guia slug="mejor-dia-para-repostar" conDatos fuentes={[['Histórico diario de precios: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/']]}>
+  <p>Es habitual oír que hay días de la semana en los que repostar sale más barato. Lo hemos comprobado con el precio medio diario de todas las gasolineras de España durante los últimos {ga.n} días.</p>
+  <h2>Resultado</h2>
+  <p>Con los datos de los últimos meses, el día en que el gasóleo A ha salido de media más barato es el <strong>{DIAS[mejor]}</strong> y el más caro, el <strong>{DIAS[peor]}</strong>. Pero la diferencia es de solo <strong>{rango.toFixed(2).replace('.', ',')} céntimos por litro</strong>: en un depósito de 50 litros, unos {(rango * 0.5).toFixed(2).replace('.', ',')} €.</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Día</th><th class="n">Gasóleo A (céntimos/l)</th><th class="n">Gasolina 95 (céntimos/l)</th></tr></thead>
+    <tbody>{orden.map((d) => <tr><td>{DIAS[d].charAt(0).toUpperCase() + DIAS[d].slice(1)}</td><td class:list={['n', { top1: d === mejor }]}>{c(ga.dias[d])}</td><td class="n">{c(g95.dias[d])}</td></tr>)}</tbody>
+  </table></div>
+  <p><small>Cada cifra indica cuánto se aparta de media ese día del precio de su semana (media móvil centrada de 7 días). Así se elimina el efecto de que el precio general suba o baje durante el periodo. Un valor negativo significa más barato que su semana.</small></p>
+  <h2>Lo que importa de verdad: qué gasolinera eliges</h2>
+  <p>En los municipios con cinco o más gasolineras, la diferencia media entre la más cara y la más barata para el diésel es hoy de <strong>{dispersion.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Es decir, elegir bien la estación ahorra mucho más que elegir el día. Consulta la tabla de tu <a href="/gasolineras/">provincia o municipio</a> o usa el <a href="/buscador/">buscador por cercanía</a>.</p>
+  <h2>Evolución reciente</h2>
+  <Grafico titulo="Precio medio diario en España, últimos 90 días" series={[{ nombre: 'Gasóleo A', puntos: ultimosDias(serieNacional('ga'), 90) }, { nombre: 'Gasolina 95', puntos: ultimosDias(serieNacional('g95'), 90) }]} />
+  <h2>Limitaciones</h2>
+  <ul>
+    <li>Usamos un precio por estación y día, el que registra el Ministerio. Las variaciones a lo largo del mismo día no se ven en este análisis.</li>
+    <li>Es una media nacional: en tu zona el patrón puede ser distinto.</li>
+    <li>El resultado se recalcula cada día, así que el día «más barato» puede cambiar con el tiempo.</li>
+  </ul>
+</Guia>

@@ -1,0 +1,30 @@
+---
+// Envoltorio común de las guías: título/descripcion desde GUIAS, migas, Article (schema.org), fuentes y guías relacionadas.
+import Base from '../layouts/Base.astro';
+import Migas from './Migas.astro';
+import Anuncio from './Anuncio.astro';
+import { GUIAS } from '../lib/guias.mjs';
+import { fechaLarga, FECHA } from '../lib/datos.mjs';
+interface Props { slug: string; fuentes: [string, string][]; conDatos?: boolean }
+const { slug, fuentes, conDatos = false } = Astro.props;
+const g = GUIAS.find((x) => x.slug === slug)!;
+const url = `/guias/${slug}/`;
+const i = GUIAS.indexOf(g);
+const relacionadas = [1, 2, 3, 4].map((k) => GUIAS[(i + k) % GUIAS.length]);
+const ld = [{ '@context': 'https://schema.org', '@type': 'Article', headline: g.titulo, description: g.descripcion, inLanguage: 'es-ES',
+  datePublished: '2026-11-16', dateModified: conDatos ? FECHA : g.revisada, author: { '@type': 'Organization', name: 'LitroHoy' },
+  mainEntityOfPage: new URL(url, Astro.site).href }];
+---
+<Base title={`${g.titulo} | LitroHoy`} description={g.descripcion} jsonld={ld}>
+  <Migas items={[['Guías', '/guias/'], [g.titulo, url]]} />
+  <article class="guia">
+    <h1>{g.titulo}</h1>
+    <p><small>Revisada el {fechaLarga(g.revisada)}{conDatos && ` · cifras actualizadas con los precios del ${fechaLarga(FECHA)}`}</small></p>
+    <slot />
+    <h2>Fuentes</h2>
+    <ul>{fuentes.map(([t, u]) => <li>{u ? <a href={u} rel="nofollow noopener" target="_blank">{t}</a> : t}</li>)}</ul>
+  </article>
+  <Anuncio />
+  <h2>Más guías</h2>
+  <ul>{relacionadas.map((r) => <li><a href={`/guias/${r.slug}/`}>{r.titulo}</a></li>)}</ul>
+</Base>

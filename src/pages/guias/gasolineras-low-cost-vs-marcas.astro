@@ -1,0 +1,29 @@
+---
+import Guia from '../../components/Guia.astro';
+import { marcas, provPorId, media, eur } from '../../lib/datos.mjs';
+// Índice relativo: diferencia media de cada estación de la marca frente a la media de SU provincia (quita el efecto geográfico)
+const filas = marcas.filter((m) => m.stats.ga).map((m) => {
+  const difs = m.est.filter((e) => e.ga && provPorId[e.p]?.stats.ga).map((e) => (e.ga - provPorId[e.p].stats.ga.media) * 100);
+  return { m, dif: media(difs), n: difs.length };
+}).sort((a, b) => a.dif - b.dif);
+const baratas = filas.filter((x) => x.dif < 0);
+const top = filas.slice(0, 3), bottom = filas.slice(-3).reverse();
+const c = (x) => (x > 0 ? '+' : '') + x.toFixed(1).replace('.', ',');
+const ahorroAnual = (cent) => ((cent / 100) * 50 * 3 * 12).toFixed(0);
+---
+<Guia slug="gasolineras-low-cost-vs-marcas" conDatos fuentes={[['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/']]}>
+  <p>Comparar el precio medio de cada marca en toda España engaña: una cadena con muchas estaciones en provincias baratas parece barata aunque no lo sea. Por eso comparamos cada gasolinera con la media de <em>su propia provincia</em> y después hacemos la media por marca. Analizamos las {filas.length} marcas con 25 o más estaciones.</p>
+  <h2>Qué marcas son más baratas que su zona</h2>
+  <p>Hoy, las marcas cuyas gasolineras están más por debajo de la media de su provincia en gasóleo A son {top.map((x, i) => <>{i > 0 && (i === top.length - 1 ? ' y ' : ', ')}<a href={x.m.url}>{x.m.nombre}</a> ({c(x.dif)} céntimos)</>)}. En el otro extremo están {bottom.map((x, i) => <>{i > 0 && (i === bottom.length - 1 ? ' y ' : ', ')}<a href={x.m.url}>{x.m.nombre}</a> ({c(x.dif)})</>)}.</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Marca</th><th class="n">Frente a la media de su provincia (cént./l, diésel)</th><th class="n">Precio medio</th><th class="n">Estaciones</th></tr></thead>
+    <tbody>{filas.map((x) => <tr><td><a href={x.m.url}>{x.m.nombre}</a></td><td class:list={['n', x.dif > 0 ? 'sube' : 'baja']}>{c(x.dif)}</td><td class="n">{eur(x.m.stats.ga.media)}</td><td class="n">{x.n}</td></tr>)}</tbody>
+  </table></div>
+  <h2>¿Cuánto se ahorra al año?</h2>
+  <p>Con 3 depósitos de 50 litros al mes, repostar en una estación que esté 10 céntimos por debajo de la media te ahorra unos {ahorroAnual(10)} € al año. Entre la marca más barata y la más cara de la tabla hay {(filas.at(-1).dif - filas[0].dif).toFixed(1).replace('.', ',')} céntimos de diferencia: unos {ahorroAnual(filas.at(-1).dif - filas[0].dif)} € al año con ese consumo. Calcula tu caso con la calculadora de tu <a href="/gasolineras/">municipio o provincia</a>.</p>
+  <h2>¿Por qué unas cadenas son más baratas?</h2>
+  <p>Las cadenas de bajo coste suelen trabajar con estaciones automáticas o con poco personal, sin tienda o con una tienda pequeña, y con menos servicios (lavado, taller). Las grandes marcas añaden programas de fidelización y descuentos con tarjeta o aplicación que no aparecen en el precio oficial: si los usas, tu precio real puede ser algo menor que el que mostramos.</p>
+  <h2>¿Es peor el carburante low cost?</h2>
+  <p>Todo el carburante que se vende en España para automoción tiene que cumplir las mismas especificaciones técnicas mínimas, sea de la marca que sea. Las diferencias están en los aditivos propios que algunas marcas añaden a sus productos, y sobre todo en las gamas «premium».</p>
+  <p>{baratas.length} de las {filas.length} marcas analizadas están hoy por debajo de la media de su provincia.</p>
+</Guia>
