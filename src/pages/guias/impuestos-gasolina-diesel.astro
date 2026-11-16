@@ -46,7 +46,7 @@ const c = (x) => num(x * 100, 1);
   <p><strong>2. El IVA</strong>, hoy al <strong>{F.iva} %</strong> (el tipo general de la Ley 37/1992). Ojo: el IVA se calcula sobre el precio que ya incluye el impuesto sobre hidrocarburos, así que también se paga IVA sobre ese impuesto.</p>
 
   <h2>Los cambios de 2026: rebajas temporales</h2>
-  <p>Desde el 22 de marzo de 2026, con el Plan Integral de Respuesta a la Crisis en Oriente Medio, el Gobierno ha rebajado el impuesto sobre hidrocarburos mediante tres reales decretos-ley, y entre el 22 de marzo y el 30 de junio también bajó el IVA de los carburantes al 10 %. Las rebajas de cada mes dependían de que el IPC del carburante subiera más de un 15 % interanual (cláusulas de salvaguarda, con los datos del INE). Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
+  <p>Desde el 22 de marzo de 2026, con el Plan Integral de Respuesta a la Crisis en Oriente Medio, el Gobierno ha rebajado el impuesto sobre hidrocarburos mediante tres reales decretos-ley, y entre el 22 de marzo y el 31 de mayo también bajó el IVA de los carburantes al 10 % (en junio, probablemente también; ese dato no está confirmado, lo explicamos debajo de la tabla). Las rebajas de cada mes dependían de que el IPC del carburante subiera más de un 15 % interanual (cláusulas de salvaguarda, con los datos del INE). Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
   <TablaFiscal carb={['g95', 'ga', 'gb']} hoy={FECHA} />
   <p>Cuando termina una rebaja sin prórroga, se vuelve automáticamente a los tipos normales de la ley. {F.rebaja && <>La actual acaba el {fechaLarga(F.hasta)}.</>} Revisamos estos tipos cada día con nuestro bot y los contrastamos con el BOE.</p>
 
@@ -61,7 +61,8 @@ const c = (x) => num(x * 100, 1);
   <h2>Tres consecuencias prácticas</h2>
   <ul>
     <li><strong>Cuando el carburante baja, el peso de los impuestos sube.</strong> Como el impuesto sobre hidrocarburos es una cantidad por litro, si el precio cae, ese impuesto pesa más sobre el total (y al revés).</li>
-    <li><strong>El diésel paga menos impuesto especial que la gasolina</strong>: hoy, {c(F.ieh.g95 - F.ieh.ga)} céntimos menos por litro que la gasolina 95 ({c((F.ieh.g95 - F.ieh.ga) * F.factorIva)} con IVA). Con los tipos normales la diferencia es de {c(NORMAL.ieh.g95 - NORMAL.ieh.ga)} céntimos.</li>
+    {(() => { const hoy = F.ieh.g95 - F.ieh.ga, normal = NORMAL.ieh.g95 - NORMAL.ieh.ga, igual = Math.abs(hoy - normal) < 0.0005; return (
+    <li><strong>El diésel paga menos impuesto especial que la gasolina</strong>: {c(hoy)} céntimos menos por litro que la gasolina 95 ({c(hoy * F.factorIva)} con IVA){igual ? (F.rebaja ? ', lo mismo con la rebaja actual que con los tipos normales' : '') : `; con los tipos normales serían ${c(normal)} céntimos`}.</li>); })()}
     <li><strong>Parte de lo que cuesta de más la 98 son impuestos</strong>: hoy paga {c(F.ieh.g98 - F.ieh.g95)} céntimos más de impuesto especial por litro que la 95 ({c((F.ieh.g98 - F.ieh.g95) * F.factorIva)} con IVA). Lo explicamos en <a href="/guias/gasolina-95-o-98/">gasolina 95 o 98</a>.</li>
   </ul>
   <h2>¿Y en Canarias, Ceuta y Melilla?</h2>

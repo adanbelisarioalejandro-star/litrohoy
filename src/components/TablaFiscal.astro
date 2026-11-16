@@ -16,10 +16,11 @@ const filas = [
   <thead><tr><th>Periodo y norma</th><th class="n">IVA</th>{carb.map((c) => <th class="n">{NOM[c]}<br /><small>imp. hidrocarburos/l</small></th>)}</tr></thead>
   <tbody>{filas.map((f) => (
     <tr class:list={[{ vigente: f.vigente }]}>
-      <td><strong>{f.periodo}</strong>{f.vigente && ' (vigente)'}<br /><small><a href={f.url} rel="nofollow noopener" target="_blank">{f.norma}</a></small></td>
+      <td><strong>{f.periodo}</strong>{f.vigente && ' (vigente)'}{f.confirmado === false && <> <em>(dato no confirmado*)</em></>}<br /><small><a href={f.url} rel="nofollow noopener" target="_blank">{f.norma}</a></small></td>
       <td class="n">{f.iva} %</td>
       {carb.map((c) => <td class="n">{eur(litro(f.tipos[c]), 5)}{f.tipos !== NORMAL.tipos && <><br /><small>{eur(litro(f.tipos[c]) - litro(FISCAL.normal.tipos[c]), 3).replace(/^(?!-)/, '+')}</small></>}</td>)}
     </tr>))}
   </tbody>
 </table></div>
+{FISCAL.periodos.filter((p) => p.confirmado === false).map((p) => <p><small>* <strong>Del {corto(p.desde)} al {fechaLarga(p.hasta)}:</strong> {p.detalle}</small></p>)}
 <style>.vigente td { background: var(--fondo-suave, #eef6ef); }</style>

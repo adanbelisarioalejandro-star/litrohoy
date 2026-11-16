@@ -22,7 +22,7 @@ const salto = ['2026-03-01', '2026-04-01'].every((d) => mapaGa[d] && mapa95[d]) 
   return { f, a, b, total: b - a, efectoFiscal, mercado: b - a - efectoFiscal };
 });
 const nom = { ga: 'gasóleo A', g95: 'gasolina 95' };
-const regimen = (d) => { const r = fiscal(d); return r.rebaja ? `Rebaja (IVA ${r.iva} %)` : `Normal (IVA ${r.iva} %)`; };
+const regimen = (d) => { const r = fiscal(d); return (r.rebaja ? `Rebaja (IVA ${r.iva} %)` : `Normal (IVA ${r.iva} %)`) + (r.confirmado === false ? ', sin confirmar' : ''); };
 ---
 <Guia slug="evolucion-precio-carburantes" conDatos fuentes={[
   ['Histórico de precios por fecha: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
@@ -44,7 +44,7 @@ const regimen = (d) => { const r = fiscal(d); return r.rebaja ? `Rebaja (IVA ${r
   <p><small>Media simple de todas las estaciones con precio ese día, incluidas Canarias, Ceuta y Melilla. Una diferencia negativa significa que el diésel está más caro que la gasolina.</small></p>
 
   <h2>Los cambios fiscales de 2026</h2>
-  <p>En 2026 el precio no solo ha dependido del mercado: desde el 22 de marzo el Gobierno ha rebajado el impuesto sobre hidrocarburos con tres reales decretos-ley (7/2026, 18/2026 y 25/2026), y del 22 de marzo al 30 de junio también bajó el IVA de los carburantes del 21 % al 10 %. Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
+  <p>En 2026 el precio no solo ha dependido del mercado: desde el 22 de marzo el Gobierno ha rebajado el impuesto sobre hidrocarburos con tres reales decretos-ley (7/2026, 18/2026 y 25/2026), y del 22 de marzo al 31 de mayo también bajó el IVA de los carburantes del 21 % al 10 % (en junio, probablemente también, pero ese dato no está confirmado). Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
   <TablaFiscal carb={['g95', 'ga']} hoy={FECHA} />
 
   {salto && <>

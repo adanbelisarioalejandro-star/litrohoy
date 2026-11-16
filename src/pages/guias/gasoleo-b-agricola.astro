@@ -26,7 +26,7 @@ const c = (x) => num(x * 100, 1);
   {F.rebaja
     ? <p data-qc-fiscal-dif={difImp(F).toFixed(5)} data-qc-real-dif={mediana.toFixed(5)}>Hoy los dos tienen una rebaja temporal ({F.norma}, hasta el {fechaLarga(F.hasta)}): el gasóleo B paga {num(F.tipos.gb[0], 2)} + {num(F.tipos.gb[1], 2)} €/1.000 l y el gasóleo A, {num(F.tipos.ga[0], 2)} + {num(F.tipos.ga[1], 2)} €/1.000 l. Como la rebaja del gasóleo A es mayor, la diferencia de impuestos entre los dos se reduce hoy a <strong>{c(difImp(F))} céntimos por litro</strong> con IVA, y eso es lo que se ve en el surtidor: la diferencia real de precio más habitual es de {c(mediana)} céntimos.</p>
     : <p data-qc-fiscal-dif={difImp(F).toFixed(5)} data-qc-real-dif={mediana.toFixed(5)}>Hoy se aplican esos tipos normales, y la diferencia real de precio más habitual entre los dos gasóleos es de {c(mediana)} céntimos por litro.</p>}
-  <p>Desde el 22 de marzo de 2026, el tipo del gasóleo B ha sido de 21 € por 1.000 litros (17,09 + 3,91), salvo en julio (39,93 €). El detalle está en la guía de <a href="/guias/impuestos-gasolina-diesel/">impuestos de los carburantes</a>.</p>
+  <p>Desde el 22 de marzo de 2026, el tipo del gasóleo B ha sido de 21 € por 1.000 litros (17,09 + 3,91), salvo en julio (39,93 €); el de junio no está confirmado. El detalle está en la guía de <a href="/guias/impuestos-gasolina-diesel/">impuestos de los carburantes</a>.</p>
   <h2>Quién puede usarlo</h2>
   <p>Según el artículo 54.2 de la ley, el gasóleo con este tipo reducido puede usarse como carburante en todos los motores <strong>excepto</strong>:</p>
   <ul>
