@@ -13,6 +13,7 @@ npm run update     # descarga los precios de hoy (+ el día exacto de hace 1 añ
 npm run dev        # servidor local
 npm run build      # astro build + control de calidad (scripts/qc.mjs)
 npm test           # tests (node:test, sin red)
+BASE_PATH=/litrohoy node scripts/base.mjs dist   # vista previa en github.io (lo hace el bot si existe la variable)
 node scripts/expand.mjs           # publicar hasta 40 municipios nuevos aptos
 node scripts/vigilar.mjs dist     # enlaces internos rotos
 node scripts/informe.mjs          # regenera INFORME.md y SIGUIENTE.md

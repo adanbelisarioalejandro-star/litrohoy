@@ -25,6 +25,12 @@ export function elegir(candidatos, puntos, max) {
   return [...candidatos].sort((a, b) => (puntos[b.prov] ?? 0) - (puntos[a.prov] ?? 0) || b.est.length - a.est.length).slice(0, max);
 }
 
+/** Cupo de esta semana: MAX menos lo publicado en los 7 días anteriores (aunque el bot se lance varias veces). */
+export function cupoSemanal(publicadas, hoy, max = MAX_SEMANAL) {
+  const recientes = Object.values(publicadas).filter((f) => (new Date(hoy) - new Date(f)) / 864e5 < 7).length;
+  return Math.max(0, max - recientes);
+}
+
 export function bloqueadoReciente(bloq, id, hoy) {
   const b = bloq[id];
   return !!b && (new Date(hoy) - new Date(b.fecha)) / 864e5 < DIAS_BLOQUEO;
@@ -39,7 +45,7 @@ if (process.argv[1]?.endsWith('expand.mjs')) {
   const candidatos = municipios.filter((m) => !(m.id in pub.municipios) && !bloqueadoReciente(bloq, m.id, FECHA) && !motivosNoApta(m).length);
   const elegidos = inicial
     ? candidatos.filter((m) => m.est.length >= 10)
-    : elegir(candidatos, puntuacionProvincias(json(`${D}/metricas.json`, null), municipios), MAX_SEMANAL);
+    : elegir(candidatos, puntuacionProvincias(json(`${D}/metricas.json`, null), municipios), cupoSemanal(pub.municipios, FECHA));
   for (const m of elegidos) pub.municipios[m.id] = FECHA;
   writeFileSync(fPub, JSON.stringify(pub, null, 0).replace(/,"/g, ',\n"') + '\n');
   console.log(`Publicados ${elegidos.length} municipios nuevos (total ${Object.keys(pub.municipios).length}; candidatos aptos restantes ${candidatos.length - elegidos.length})`);

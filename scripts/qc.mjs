@@ -70,7 +70,8 @@ export function controlar(dir) {
   const res = [];
   for (const p of paginas(dir)) {
     const html = readFileSync(p.fichero, 'utf8');
-    if (NOINDEX.test(html)) continue; // retiradas: fuera del índice, no cuentan
+    // retiradas: fuera del índice, no cuentan. En la vista previa (BASE_PATH) todo es noindex y se revisa todo igual
+    if (!process.env.BASE_PATH && NOINDEX.test(html)) continue;
     res.push({ url: p.url, ...revisar(p.url, html) });
   }
   // títulos y descripciones únicos

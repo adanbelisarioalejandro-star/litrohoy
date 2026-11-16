@@ -4,12 +4,13 @@ import { mkdtempSync, mkdirSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { generateKeyPairSync, createVerify } from 'node:crypto';
-import { elegir, puntuacionProvincias, bloqueadoReciente, MAX_SEMANAL } from '../scripts/expand.mjs';
+import { elegir, puntuacionProvincias, bloqueadoReciente, cupoSemanal, MAX_SEMANAL } from '../scripts/expand.mjs';
 import { revisar, firma, similitud, controlar, tipo } from '../scripts/qc.mjs';
 import { enlacesRotos, comprobarOnline } from '../scripts/vigilar.mjs';
 import { decidirRetiradas } from '../scripts/mejorar.mjs';
 import { porRuta, jwtCuentaServicio, SCOPE_GSC } from '../scripts/medir.mjs';
 import { generar } from '../scripts/informe.mjs';
+import { conBase } from '../scripts/base.mjs';
 
 const pagina = (url, cuerpo, extra = '') => `<html><head><title>T ${url}</title><meta name="description" content="Descripción suficientemente larga para ${url} con datos reales de precios."><link rel="canonical" href="https://x.es${url}">${extra}</head><body><main><h1>H</h1>${cuerpo}</main></body></html>`;
 const texto = (n, semilla = '') => Array.from({ length: n }, (_, i) => `palabra${semilla}${i}`).join(' ');
@@ -24,6 +25,12 @@ test('ampliar: máximo semanal, prioriza provincias con impresiones y respeta bl
   assert.equal(e[0].prov, '41');
   assert.ok(bloqueadoReciente({ 5: { fecha: '2026-11-10' } }, '5', '2026-11-16'));
   assert.ok(!bloqueadoReciente({ 5: { fecha: '2026-09-01' } }, '5', '2026-11-16'));
+  // varias ejecuciones en la misma semana no superan el máximo
+  const pub = Object.fromEntries(Array.from({ length: 30 }, (_, i) => [String(i), '2026-11-14']));
+  assert.equal(cupoSemanal(pub, '2026-11-16'), 10);
+  assert.equal(cupoSemanal(pub, '2026-11-20'), 10);
+  assert.equal(cupoSemanal(pub, '2026-11-21'), 40); // 7 días después vuelve el cupo completo
+  assert.equal(cupoSemanal({ ...pub, n1: '2026-11-16', n2: '2026-11-16', n3: '2026-11-16', n4: '2026-11-16', n5: '2026-11-16', n6: '2026-11-16', n7: '2026-11-16', n8: '2026-11-16', n9: '2026-11-16', n10: '2026-11-16', n11: '2026-11-16' }, '2026-11-16'), 0);
 });
 
 test('QC: bloquea páginas de datos sin fuente, con pocos datos o escasas', () => {
@@ -97,4 +104,13 @@ test('informe: refleja páginas, errores y tareas pendientes', () => {
   assert.match(informe, /1,50\s€/); // toLocaleString usa espacio irrompible
   assert.match(siguiente, /Dominio y despliegue/);
   assert.match(siguiente, /Revisar títulos/);
+});
+
+test('vista previa: añade la ruta base a enlaces internos, fetch, JSON y URL absolutas, sin tocar externos', () => {
+  const S = 'https://u.github.io';
+  const html = `<a href="/gasolineras/">x</a><link href="/_astro/a.css"><a href="https://fuera.es/">e</a><a href="//cdn.x/">c</a><script>fetch(\`/datos/\${id}.json\`);fetch('/datos/provincias.json')</script><link rel="canonical" href="${S}/marcas/"><a href="${S}/litrohoy/ya/">y</a>`;
+  assert.equal(conBase(html, '.html', '/litrohoy', S),
+    `<a href="/litrohoy/gasolineras/">x</a><link href="/litrohoy/_astro/a.css"><a href="https://fuera.es/">e</a><a href="//cdn.x/">c</a><script>fetch(\`/litrohoy/datos/\${id}.json\`);fetch('/litrohoy/datos/provincias.json')</script><link rel="canonical" href="${S}/litrohoy/marcas/"><a href="${S}/litrohoy/ya/">y</a>`);
+  assert.equal(conBase('[["Repsol","C/ Mayor",1.5,"/gasolineras/a/b/"]]', '.json', '/litrohoy/', S), '[["Repsol","C/ Mayor",1.5,"/litrohoy/gasolineras/a/b/"]]');
+  assert.equal(conBase(`<loc>${S}/a/</loc>`, '.xml', '/litrohoy', S), `<loc>${S}/litrohoy/a/</loc>`);
 });

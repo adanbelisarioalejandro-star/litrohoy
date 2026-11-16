@@ -2,6 +2,7 @@
 interface Props { title: string; description: string; path?: string; jsonld?: object[]; noindex?: boolean }
 const { title, description, path = Astro.url.pathname, jsonld = [], noindex = false } = Astro.props;
 const SITIO = 'LitroHoy';
+const vistaPrevia = !!process.env.BASE_PATH; // github.io sin dominio: que Google no la indexe todavía
 const site = Astro.site!.href.replace(/\/$/, '');
 const canonical = site + path;
 const adsId = import.meta.env.PUBLIC_ADSENSE_ID; // ca-pub-XXXXXXXXXXXXXXXX (vacío hasta que AdSense apruebe)
@@ -16,7 +17,7 @@ const nav = [['/', 'Inicio'], ['/buscador/', 'Buscador'], ['/gasolineras/', 'Pro
   <title>{title}</title>
   <meta name="description" content={description} />
   <link rel="canonical" href={canonical} />
-  {noindex && <meta name="robots" content="noindex, follow" />}
+  {(noindex || vistaPrevia) && <meta name="robots" content="noindex, follow" />}
   <meta property="og:type" content="website" />
   <meta property="og:locale" content="es_ES" />
   <meta property="og:site_name" content={SITIO} />

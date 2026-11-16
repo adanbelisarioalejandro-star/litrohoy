@@ -12,7 +12,7 @@ Cada paso que cueste dinero o cree una cuenta necesita tu decisión. Nunca pegue
    ```
 4. Activa Pages con Actions: `Settings → Pages → Build and deployment → Source: GitHub Actions` (https://github.com/TU_USUARIO/litrohoy/settings/pages).
 5. Lanza el bot por primera vez: `Actions → bot → Run workflow` (marca "semanal"). Desde ahí se ejecuta solo cada día.
-   Mientras no exista la variable `SITE_URL` (paso 2.5), el bot actualiza datos, compila y pasa el control de calidad, pero **no despliega**: sin dominio propio los enlaces se romperían en `TU_USUARIO.github.io/litrohoy/`.
+   **Vista previa gratis (activa desde el 16-11-2026):** https://adanbelisarioalejandro-star.github.io/litrohoy/ con las variables `SITE_URL=https://adanbelisarioalejandro-star.github.io` y `BASE_PATH=/litrohoy`. Todas sus páginas llevan `noindex` para que Google no la indexe todavía.
 
 ## 2. Dominio propio (DE PAGO: unos 10-12 € al año, necesita tu OK)
 AdSense exige un sitio propio; los subdominios `*.github.io` no suelen aprobarse. Propuesta: **litrohoy.com** (libre el 16-11-2026).
@@ -22,7 +22,7 @@ AdSense exige un sitio propio; los subdominios `*.github.io` no suelen aprobarse
    - 1 `CNAME` para `www`: `TU_USUARIO.github.io`
 3. En `Settings → Pages → Custom domain` escribe `litrohoy.com`, guarda y marca **Enforce HTTPS** cuando aparezca.
 4. Verifica el dominio en GitHub para evitar suplantaciones: https://github.com/settings/pages → "Add a domain".
-5. Crea la variable `SITE_URL` = `https://litrohoy.com` en `Settings → Secrets and variables → Actions → Variables`.
+5. En `Settings → Secrets and variables → Actions → Variables`: cambia `SITE_URL` a `https://litrohoy.com` y **borra `BASE_PATH`** (quita la vista previa y el `noindex`).
 
 ## 3. Datos legales (personales: solo tú)
 Rellena los huecos `[RELLENAR]` (nombre o razón social, NIF, domicilio y correo de contacto) en:
