@@ -22,7 +22,8 @@ export const textoPrincipal = (html) => (html.match(/<main[^>]*>([\s\S]*)<\/main
   .replace(/<(script|style)[\s\S]*?<\/\1>/g, ' ').replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/g, ' ').replace(/\s+/g, ' ').trim();
 
 export const tipo = (url) => (/^\/gasolineras\/[^/]+\/[^/]+\/$/.test(url) ? 'municipio'
-  : /^\/(gasolineras|comunidad|marca)\//.test(url) ? 'datos' : url.startsWith('/guias/') && url !== '/guias/' ? 'guia' : 'otra');
+  : /^\/carretera\/[^/]+\/$/.test(url) ? 'carretera'
+  : /^\/(gasolineras|comunidad|marca|carreteras)\//.test(url) ? 'datos' : url.startsWith('/guias/') && url !== '/guias/' ? 'guia' : 'otra');
 
 // MinHash (64 permutaciones) sobre trigramas de palabras: estima la similitud de Jaccard sin comparar conjuntos enteros
 const K = 64;
@@ -57,7 +58,7 @@ export function revisar(url, html) {
   const palabras = texto.split(' ').length;
   const min = t === 'guia' ? MIN_PALABRAS.guia : t === 'otra' ? MIN_PALABRAS.otra : MIN_PALABRAS.datos;
   if (palabras < min) fallos.push(`contenido escaso: ${palabras} palabras (mínimo ${min})`);
-  if (t === 'municipio' || t === 'datos') {
+  if (t === 'municipio' || t === 'datos' || t === 'carretera') {
     if (!html.includes('class="fuente"') || !/<time datetime="\d{4}-\d{2}-\d{2}"/.test(html)) fallos.push('no muestra la fuente y la fecha de actualización');
     const precios = (texto.match(/\d,\d{3} €/g) ?? []).length;
     if (precios < 6) fallos.push(`datos insuficientes: solo ${precios} precios en la página`);
@@ -102,22 +103,22 @@ if (process.argv[1]?.endsWith('qc.mjs')) {
   console.log(`QC: ${res.length} páginas revisadas, ${malas.length} con fallos`);
   for (const r of malas) console.log(`  ✗ ${r.url}: ${r.fallos.join('; ')}`);
   if (!malas.length) process.exit(0);
-  const mun = malas.filter((r) => r.t === 'municipio');
+  const mun = malas.filter((r) => r.t === 'municipio' || r.t === 'carretera');
   if (corregir && mun.length === malas.length) {
-    // Solo fallan municipios: se despublican (bloqueados 28 días) y hay que reconstruir
-    const { municipios } = await import('../src/lib/datos.mjs');
+    // Solo fallan municipios o carreteras: se despublican (bloqueados 28 días) y hay que reconstruir
+    const { municipios, carreteras } = await import('../src/lib/datos.mjs');
     const pub = JSON.parse(readFileSync(`${D}/publicadas.json`, 'utf8'));
     const bloq = existsSync(`${D}/bloqueadas.json`) ? JSON.parse(readFileSync(`${D}/bloqueadas.json`, 'utf8')) : {};
     const hoy = new Date().toISOString().slice(0, 10);
     for (const r of mun) {
-      const m = municipios.find((x) => x.url === r.url);
-      if (!m) continue;
-      delete pub.municipios[m.id];
-      bloq[m.id] = { fecha: hoy, url: r.url, motivo: r.fallos.join('; ') };
+      const c = r.t === 'carretera' && carreteras.find((x) => x.url === r.url);
+      const m = !c && municipios.find((x) => x.url === r.url);
+      if (c) { delete pub.carreteras?.[c.id]; bloq[`c:${c.id}`] = { fecha: hoy, url: r.url, motivo: r.fallos.join('; ') }; }
+      if (m) { delete pub.municipios[m.id]; bloq[m.id] = { fecha: hoy, url: r.url, motivo: r.fallos.join('; ') }; }
     }
     writeFileSync(`${D}/publicadas.json`, JSON.stringify(pub, null, 0).replace(/,"/g, ',\n"') + '\n');
     writeFileSync(`${D}/bloqueadas.json`, JSON.stringify(bloq, null, 1) + '\n');
-    console.log(`Despublicados ${mun.length} municipios. Reconstruye el sitio.`);
+    console.log(`Despublicadas ${mun.length} páginas (municipios o carreteras). Reconstruye el sitio.`);
     process.exit(3);
   }
   process.exit(1);

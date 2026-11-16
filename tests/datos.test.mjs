@@ -55,3 +55,18 @@ test('zona de referencia para uniprovinciales', () => {
   assert.equal(d.provPorId['28'].ref, 'la Comunidad de Madrid');
   assert.equal(d.comunidades.find((c) => c.id === '13').uni, true);
 });
+
+test('carreteras: red principal con punto kilométrico, nombres unificados', () => {
+  const c = (x) => d.carreteraDe(x);
+  assert.deepEqual(c('CARRETERA N-340 KM. 702,1'), { nombre: 'N-340', km: 702.1 });
+  assert.deepEqual(c('AUTOVIA E-5/A-4 KM. 357,8'), { nombre: 'A-4', km: 357.8 }); // la europea no cuenta
+  assert.equal(c('CARRETERA N-2 KM 30').nombre, 'N-II'); // radiales siempre en romanos
+  assert.equal(c('N-II KM 728').nombre, 'N-II');
+  assert.equal(c('CTRA. N-VI KM 386.200').km, 386.2);
+  assert.equal(c('AUTOVIA A52 KM 292').nombre, 'A-52');
+  assert.equal(c('CARRETERA A-315 KM. 90'), null); // autonómica de 3 cifras
+  assert.equal(c('AUTOPISTA A6 KM 0'), null); // km 0: dato dudoso
+  assert.equal(c('CARRETERA N-340'), null); // sin km no se sabe dónde está
+  assert.equal(c('CAMINO A TOLEDO KM 3'), null);
+});
+

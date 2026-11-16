@@ -177,7 +177,8 @@ export const ccaaPorId = Object.fromEntries(comunidades.map((c) => [c.id, c]));
 // p.ref: cómo nombrar la zona de referencia en los textos ("la provincia de Sevilla" / "la Comunidad de Madrid")
 for (const p of provincias) { const c = ccaaPorId[p.ccaa]; p.ref = refZona(p, c.nombre, c.provs.length === 1); }
 
-const publicadas = json(`${D}/publicadas.json`, { municipios: {} }).municipios;
+const pubJson = json(`${D}/publicadas.json`, { municipios: {} });
+const publicadas = pubJson.municipios;
 export const retiradas = new Set(json(`${D}/retiradas.json`, []));
 
 export const municipios = [];
@@ -245,3 +246,40 @@ export function tendencia(serie, dias = 30) {
   if (Math.abs(v) < 0.3) return `se ha mantenido estable en los últimos ${dias} días (${pct(v)})`;
   return `ha ${v > 0 ? 'subido' : 'bajado'} un ${Math.abs(v).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % en los últimos ${dias} días`;
 }
+
+// ---------- carreteras ----------
+// Solo red principal: autopistas (AP-), autovías del Estado (A-1 a A-99) y nacionales (N-), y solo gasolineras cuya
+// dirección oficial da el punto kilométrico. Las A- de 3 cifras son autonómicas (A-315, A-140) y se descartan.
+export const MIN_ESTACIONES_CARRETERA = 8;
+const ROMANOS = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 };
+const ROMANO = ['', 'I', 'II', 'III', 'IV', 'V', 'VI'];
+export function carreteraDe(dir) {
+  const t = dir.toUpperCase();
+  const km = t.match(/\bK\.?M\.?\s*(\d+(?:[.,]\d+)?)/);
+  if (!km || !+km[1].replace(',', '.')) return null; // km 0: suele ser un valor de relleno, no un punto real
+  for (const [, tipo, num] of t.matchAll(/\b(AP|A|N)[- ]?(\d{1,3}|VI|IV|V|III|II|I)\b/g)) {
+    const n = ROMANOS[num] ?? +num;
+    if (!n || (tipo === 'A' && n > 99)) continue;
+    // las nacionales radiales se escriben N-I…N-VI (la fuente usa también N-1…N-6)
+    const nombre = tipo === 'N' && n <= 6 ? `N-${ROMANO[n]}` : `${tipo}-${n}`;
+    return { nombre, km: +km[1].replace(',', '.') };
+  }
+  return null;
+}
+const pubCarr = pubJson.carreteras ?? {};
+export const carreteras = (() => {
+  const g = new Map();
+  for (const e of estaciones) {
+    const c = carreteraDe(e.d);
+    if (!c) continue;
+    if (!g.has(c.nombre)) g.set(c.nombre, []);
+    g.get(c.nombre).push({ ...e, km: c.km });
+  }
+  return [...g].map(([nombre, est]) => {
+    est.sort((a, b) => a.km - b.km);
+    const s = slug(nombre);
+    return { id: s, nombre, slug: s, url: `/carretera/${s}/`, est, stats: stats(est), provs: [...new Set(est.map((e) => e.p))],
+      conPrecio: est.filter((e) => e.ga || e.g95).length, publicada: s in pubCarr, desde: pubCarr[s] ?? null };
+  }).filter((c) => c.conPrecio >= MIN_ESTACIONES_CARRETERA).sort((a, b) => b.conPrecio - a.conPrecio);
+})();
+export const carreterasPublicadas = carreteras.filter((c) => c.publicada);

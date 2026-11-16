@@ -1,4 +1,4 @@
-import { provincias, comunidades, marcas, municipiosPublicados, FECHA } from '../lib/datos.mjs';
+import { provincias, comunidades, marcas, municipiosPublicados, carreterasPublicadas, FECHA } from '../lib/datos.mjs';
 import { GUIAS } from '../lib/guias.mjs';
 
 export function GET({ site }: { site: URL }) {
@@ -9,6 +9,7 @@ export function GET({ site }: { site: URL }) {
     ...comunidades.filter((c) => !c.uni).map((c) => [c.url, FECHA] as [string, string]),
     ...marcas.map((m) => [m.url, FECHA] as [string, string]),
     ...municipiosPublicados.filter((m) => !m.retirada).map((m) => [m.url, FECHA] as [string, string]),
+    ...(carreterasPublicadas.length ? ['/carreteras/', ...carreterasPublicadas.map((c) => c.url)] : []).map((u) => [u, FECHA] as [string, string]),
     ['/guias/', GUIAS.map((g) => g.revisada).sort().at(-1)!],
     ...GUIAS.map((g) => [`/guias/${g.slug}/`, g.revisada] as [string, string]),
     ...['/sobre/', '/metodologia/', '/contacto/'].map((u) => [u, '2026-11-16'] as [string, string]),

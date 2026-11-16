@@ -1,7 +1,8 @@
 ---
 import { NOMBRE, eur, titulo, direccion, nombreMunicipio } from '../lib/datos.mjs';
-interface Props { est: any[]; conMunicipio?: boolean; max?: number }
-const { est, conMunicipio = false, max = Infinity } = Astro.props;
+interface Props { est: any[]; conMunicipio?: boolean; conKm?: boolean; max?: number }
+const { est, conMunicipio = false, conKm = false, max = Infinity } = Astro.props;
+const MARGEN = { D: 'margen derecho', I: 'margen izquierdo' };
 const cols = ['g95', 'ga', 'g98', 'glp'].filter((f) => est.some((e) => e[f]));
 const minimo = Object.fromEntries(cols.map((f) => [f, Math.min(...est.filter((e) => e[f]).map((e) => e[f]))]));
 // con precio primero (ya vienen ordenadas por precio); las que no publican ninguno de estos carburantes, al final
@@ -18,7 +19,7 @@ const nombre = (e) => (e.r.length <= 3 ? e.r : titulo(e.r));
   <thead><tr><th>Gasolinera</th>{cols.map((f) => <th class="n">{NOMBRE[f].replace(' (diésel)', '')}</th>)}</tr></thead>
   <tbody>{g.map((e) => (
     <tr>
-      <td><strong>{nombre(e)}</strong><br /><small>{direccion(e.d)}{conMunicipio && ` · ${nombreMunicipio(e.m)}`}<br />Horario: {e.h}</small></td>
+      <td>{conKm && <><strong>km {e.km.toLocaleString('es-ES')}</strong>{MARGEN[e.mg] && ` · ${MARGEN[e.mg]}`}<br /></>}<strong>{nombre(e)}</strong><br /><small>{direccion(e.d)}{conMunicipio && ` · ${nombreMunicipio(e.m)}`}<br />Horario: {e.h}</small></td>
       {cols.some((f) => e[f])
         ? cols.map((f) => <td class:list={['n', { top1: e[f] && e[f] === minimo[f] }]}>{e[f] ? eur(e[f]) : '—'}</td>)
         : <td colspan={cols.length}><small>Sin precio publicado de estos carburantes</small></td>}

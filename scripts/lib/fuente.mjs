@@ -68,7 +68,7 @@ export function compactar(lista) {
     const e = {
       id: s.IDEESS, r: s['Rótulo'].trim(), d: s['Dirección'].trim(), l: s.Localidad?.trim() ?? '', cp: s['C.P.'],
       h: s.Horario, mi: s.IDMunicipio, m: s.Municipio.trim(), p: s.IDProvincia, c: s.IDCCAA,
-      lat: num(s.Latitud), lon: num(s['Longitud (WGS84)']),
+      lat: num(s.Latitud), lon: num(s['Longitud (WGS84)']), mg: s.Margen, // margen: D/I según el sentido de los km
     };
     for (const k of CLAVES) { const v = num(s[CARBURANTES[k].campo]); if (v) e[k] = v; }
     return e;

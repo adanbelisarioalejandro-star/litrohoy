@@ -4,7 +4,7 @@ import Fuente from '../components/Fuente.astro';
 import Grafico from '../components/Grafico.astro';
 import Anuncio from '../components/Anuncio.astro';
 import { GUIAS } from '../lib/guias.mjs';
-import { nacional, provincias, comunidades, marcas, municipiosPublicados, serieNacional, variacion, eur, pct, fechaLarga, FECHA, NOMBRE, estaciones } from '../lib/datos.mjs';
+import { nacional, provincias, comunidades, marcas, municipiosPublicados, carreterasPublicadas, serieNacional, variacion, eur, pct, fechaLarga, FECHA, NOMBRE, estaciones } from '../lib/datos.mjs';
 const s = nacional.stats;
 const orden = (f) => [...provincias].filter((p) => p.stats[f]).sort((a, b) => a.stats[f].media - b.stats[f].media);
 const pGa = orden('ga');
@@ -39,6 +39,12 @@ const v = (f, d) => variacion(serieNacional(f), d);
     <tbody>{mGa.slice(0, 10).map((m) => <tr><td><a href={m.url}>{m.nombre}</a></td><td class="n">{eur(m.stats.ga.media)}</td><td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{m.est.length}</td></tr>)}</tbody>
   </table></div>
   <p><a href="/marcas/">Todas las marcas →</a></p>
+
+  {carreterasPublicadas.length > 0 && <>
+    <h2>Gasolineras por carretera</h2>
+    <ul class="rejilla">{carreterasPublicadas.slice(0, 12).map((c) => <li><a href={c.url}>{c.nombre}</a> <small>({c.est.length}{c.stats.ga && `, diésel desde ${eur(c.stats.ga.min)}`})</small></li>)}</ul>
+    <p><a href="/carreteras/">Todas las carreteras →</a></p>
+  </>}
 
   <h2>Gasolineras por ciudad</h2>
   <ul class="rejilla">{grandes.map((m) => <li><a href={m.url}>{m.nombre}</a> <small>({m.est.length})</small></li>)}</ul>

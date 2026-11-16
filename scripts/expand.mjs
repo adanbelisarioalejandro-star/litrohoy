@@ -6,6 +6,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 const D = process.env.DATA_DIR ?? 'data';
 const json = (f, def) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : def);
 export const MAX_SEMANAL = 40;
+export const MAX_CARRETERAS_SEMANA = 10;
 const DIAS_BLOQUEO = 28;
 
 /** Puntuación por provincia = impresiones medias por página publicada en esa provincia (Search Console). */
@@ -37,7 +38,7 @@ export function bloqueadoReciente(bloq, id, hoy) {
 }
 
 if (process.argv[1]?.endsWith('expand.mjs')) {
-  const { municipios, motivosNoApta, FECHA } = await import('../src/lib/datos.mjs');
+  const { municipios, motivosNoApta, carreteras, FECHA } = await import('../src/lib/datos.mjs');
   const fPub = `${D}/publicadas.json`;
   const pub = json(fPub, { municipios: {} });
   const bloq = json(`${D}/bloqueadas.json`, {});
@@ -47,7 +48,14 @@ if (process.argv[1]?.endsWith('expand.mjs')) {
     ? candidatos.filter((m) => m.est.length >= 10)
     : elegir(candidatos, puntuacionProvincias(json(`${D}/metricas.json`, null), municipios), cupoSemanal(pub.municipios, FECHA));
   for (const m of elegidos) pub.municipios[m.id] = FECHA;
-  writeFileSync(fPub, JSON.stringify(pub, null, 0).replace(/,"/g, ',\n"') + '\n');
   console.log(`Publicados ${elegidos.length} municipios nuevos (total ${Object.keys(pub.municipios).length}; candidatos aptos restantes ${candidatos.length - elegidos.length})`);
   for (const m of elegidos) console.log(`  + ${m.url}`);
+  // carreteras: cupo propio de 10 por semana; ya vienen filtradas por datos suficientes y ordenadas por nº de gasolineras
+  pub.carreteras ??= {};
+  const candC = carreteras.filter((c) => !(c.id in pub.carreteras) && !bloqueadoReciente(bloq, `c:${c.id}`, FECHA));
+  const elegC = candC.slice(0, cupoSemanal(pub.carreteras, FECHA, MAX_CARRETERAS_SEMANA));
+  for (const c of elegC) pub.carreteras[c.id] = FECHA;
+  console.log(`Publicadas ${elegC.length} carreteras nuevas (total ${Object.keys(pub.carreteras).length}; aptas restantes ${candC.length - elegC.length})`);
+  for (const c of elegC) console.log(`  + ${c.url}`);
+  writeFileSync(fPub, JSON.stringify(pub, null, 0).replace(/,"/g, ',\n"') + '\n');
 }
