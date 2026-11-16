@@ -18,7 +18,7 @@ export const ACTUALIZADO = actual.actualizado;
 export const estaciones = actual.estaciones;
 
 // Criterios del control de calidad (los usan también qc.mjs y expand.mjs)
-export const MIN_ESTACIONES = 2;
+export const MIN_ESTACIONES = 3;
 export const MIN_DIAS_HISTORICO = 14;
 export const MIN_ESTACIONES_MARCA = 25;
 

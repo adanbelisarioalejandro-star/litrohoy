@@ -47,6 +47,7 @@ test('series históricas salen del CSV oficial y las variaciones exigen un dato 
 test('control de publicación: datos suficientes y lista de publicadas', () => {
   assert.deepEqual(d.motivosNoApta(d.munPorId['1']), []);
   assert.match(d.motivosNoApta(d.munPorId['3']).join(), /solo 1 gasolinera/);
+  assert.match(d.motivosNoApta(d.munPorId['2']).join(), /solo 2 gasolinera.*mínimo 3/); // 2 ya no basta
   assert.deepEqual(d.municipiosPublicados.map((m) => m.id), ['1']); // el 3 está en publicadas pero no es apto
 });
 

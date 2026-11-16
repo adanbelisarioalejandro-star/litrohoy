@@ -23,7 +23,7 @@ Evalué 5 nichos con datos públicos y gratuitos (puntuación de 1 a 5; valor pu
 
 ## 2. Qué páginas existen (y cuáles no, a propósito)
 
-- **Sí:** portada nacional, 19 CCAA, 52 provincias, municipios con al menos 2 gasolineras y datos suficientes, marcas con al menos 25 estaciones, y de 10 a 15 guías.
+- **Sí:** portada nacional, 19 CCAA, 52 provincias, municipios con al menos 3 gasolineras con precio y datos suficientes, marcas con al menos 25 estaciones, y de 10 a 15 guías.
 - **No, al menos de momento: una página por gasolinera** (unas 11.500). Serían casi iguales entre sí, con riesgo de «contenido escaso» y de «abuso de contenido a escala» en la política de spam de Google, y eso pone en peligro la aprobación de AdSense. La gasolinera aparece en la tabla de su municipio. Se volverá a valorar cuando AdSense esté aprobado (está en SIGUIENTE.md).
 - **Lanzamiento gradual:** al principio solo se publican los municipios con 10 o más gasolineras (unos 225). Cada semana el bot añade como máximo 40 municipios nuevos que pasen el control de calidad. Así se evita un salto masivo de páginas.
 
@@ -65,3 +65,5 @@ Evalué 5 nichos con datos públicos y gratuitos (puntuación de 1 a 5; valor pu
 - **Marca con página propia**: 25 o más estaciones *con precio de gasolina o diésel* (Molgas, por ejemplo, solo vende gas y quedaba vacía).
 - **Identidad de git neutra** (`LitroHoy <litrohoy@users.noreply.github.com>`), configurada solo en este repositorio, para no publicar tu correo en un repositorio público. Puedes cambiarla con `git config user.email`.
 - **Nombre de marca LitroHoy**: corto y descriptivo, sin marcas registradas de terceros. El dominio litrohoy.com estaba libre el 16-11-2026 según RDAP.
+- **Mínimo de 3 gasolineras con precio por municipio** (antes 2): con 2 la página apenas compara nada y se acerca al contenido escaso. Al subirlo no hubo que despublicar ninguno de los 265 municipios publicados (todos tenían 3 o más).
+- **Actions fijadas por SHA de commit** (checkout v7.0.1, setup-node v7.1.0, upload-pages-artifact v5.0.0, deploy-pages v5.0.1), todas con runtime Node 24, y el build con Node 24 LTS. Fijar por SHA impide que un cambio en una action (o una etiqueta movida) entre en el bot sin revisión; el comentario indica la versión para actualizarla a mano.
