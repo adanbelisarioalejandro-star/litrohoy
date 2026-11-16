@@ -8,6 +8,9 @@ import { estaciones, municipiosPublicados, provincias, FECHAS_HIST } from '../li
   <article class="guia">
     <h1>Sobre LitroHoy</h1>
     <p>LitroHoy nace con un objetivo sencillo: que encuentres en segundos la gasolinera más barata de tu zona y entiendas por qué el precio sube o baja. Llenar un depósito de 50 litros en la gasolinera más barata de un municipio en vez de en la más cara puede suponer varios euros de diferencia, y en un año de repostajes la cifra se nota.</p>
+    <h2>Quién hace LitroHoy y por qué</h2>
+    <p>LitroHoy lo hace <strong>[RELLENAR: tu nombre o el de tu empresa]</strong>, [RELLENAR: una o dos frases sobre ti, por ejemplo tu relación con los datos, la programación o la conducción]. Lo empezamos en 2026, cuando el precio del carburante se disparó con la crisis de Oriente Medio y las rebajas fiscales cambiaban cada mes: queríamos una web que explicara el precio de cada gasolinera con datos oficiales y sin rodeos.</p>
+    <p>La web se actualiza sola cada día con un proceso automático (precios, control de calidad y publicación), y las guías las revisamos a mano contra el BOE, el Ministerio, la DGT, el IDAE y el INE.</p>
     <h2>De dónde salen los datos</h2>
     <p>Desde la Orden ITC/2308/2007, quienes gestionan una gasolinera en España están obligados a comunicar sus precios al Ministerio cada lunes y siempre que los cambien, y el Ministerio los publica como datos abiertos. Cada día descargamos de forma automática los precios de las {estaciones.length.toLocaleString('es-ES', { useGrouping: 'always' })} estaciones terrestres con precio publicado, comprobamos que el formato es correcto y recalculamos todas las páginas. Guardamos un resumen diario por municipio para poder mostrarte la evolución: ahora mismo tenemos {FECHAS_HIST.length} días de histórico.</p>
     <h2>Qué encontrarás</h2>
