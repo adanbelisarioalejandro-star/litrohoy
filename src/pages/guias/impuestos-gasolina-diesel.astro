@@ -1,50 +1,70 @@
 ---
 import Guia from '../../components/Guia.astro';
-import { estaciones, stats, eur } from '../../lib/datos.mjs';
-// Ley 38/1992, art. 50.1, tarifa 1.ª (tipo general + tipo especial), en €/litro
-const IEH = { g95: (400.69 + 72) / 1000, g98: (431.92 + 72) / 1000, ga: (307 + 72) / 1000 };
+import TablaFiscal from '../../components/TablaFiscal.astro';
+import { estaciones, stats, eur, num, fechaLarga, FECHA } from '../../lib/datos.mjs';
+import { fiscal, NORMAL } from '../../lib/fiscal.mjs';
+// Tipos vigentes en la fecha de los datos (data/fiscalidad.json): rebaja temporal si la hay, si no los de la Ley 38/1992
+const F = fiscal(FECHA);
 const fuera = new Set(['35', '38', '51', '52']); // Canarias, Ceuta y Melilla: sin IVA ni IEH estatal
 const s = stats(estaciones.filter((e) => !fuera.has(e.p)));
-const filas = ['g95', 'ga', 'g98'].map((f) => {
-  const p = s[f].media, sinIva = p / 1.21, iva = p - sinIva, ieh = IEH[f];
+const desglose = (f, r) => {
+  const p = s[f].media, sinIva = p / r.factorIva, iva = p - sinIva, ieh = r.ieh[f];
   return { f, p, iva, ieh, resto: sinIva - ieh, pct: ((iva + ieh) / p) * 100 };
-});
+};
+const filas = ['g95', 'ga', 'g98'].map((f) => desglose(f, F));
 const [g95, ga] = filas;
+// mismo precio sin impuestos, con los tipos normales: lo que costaría el litro sin la rebaja
+const sinRebaja = (r) => (r.resto + NORMAL.ieh[r.f]) * NORMAL.factorIva;
 const nombres = { g95: 'Gasolina 95', ga: 'Gasóleo A', g98: 'Gasolina 98' };
-const c = (x) => (x * 100).toFixed(1).replace('.', ',');
+const c = (x) => num(x * 100, 1);
 ---
 <Guia slug="impuestos-gasolina-diesel" conDatos fuentes={[
   ['Ley 38/1992, de Impuestos Especiales, art. 50 (texto consolidado, BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
   ['Ley 37/1992, del IVA (tipo general del 21 %, art. 90)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28740'],
+  ['Real Decreto-ley 7/2026, de 20 de marzo (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-6544'],
+  ['Real Decreto-ley 18/2026, de 29 de junio (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-14112'],
+  ['Real Decreto-ley 25/2026, de 29 de septiembre (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20265'],
+  ['Agencia Tributaria: medidas del Plan Integral de Respuesta a la Crisis en Oriente Medio', 'https://sede.agenciatributaria.gob.es/Sede/todas-noticias/2026/septiembre/30/nuevas-medidas-marco-plan-integral-medio.html'],
+  ['INE: IPC por subclases (cláusulas de salvaguarda)', 'https://www.ine.es/jaxiT3/Tabla.htm?t=76128'],
   ['Precios: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
 ]}>
-  <p>Cuando pagas un litro de gasolina 95 en la Península o en Baleares, hoy de media <strong>{eur(g95.p)}</strong>, alrededor del <strong>{g95.pct.toFixed(0)} %</strong> son impuestos. En el diésel, a {eur(ga.p)} el litro, los impuestos son aproximadamente el {ga.pct.toFixed(0)} %. Te explicamos de dónde sale esa cifra con los precios de hoy.</p>
+  <p>Cuando pagas un litro de gasolina 95 en la Península o en Baleares, hoy de media <strong>{eur(g95.p)}</strong>, alrededor del <strong>{num(g95.pct)} %</strong> son impuestos. En el diésel, a {eur(ga.p)} el litro, los impuestos son aproximadamente el {num(ga.pct)} %.
+    {F.rebaja
+      ? <> Hoy está en vigor una <strong>rebaja temporal del impuesto sobre hidrocarburos</strong> ({F.norma}, hasta el {fechaLarga(F.hasta)}); sin ella, con el mismo precio antes de impuestos, el litro de diésel costaría unos {eur(sinRebaja(ga))} y el de gasolina 95, {eur(sinRebaja(g95))}.</>
+      : <> Hoy se aplican los tipos normales de la Ley 38/1992, sin rebajas temporales.</>}</p>
+
   <h2>Los dos impuestos del carburante</h2>
-  <p><strong>1. El Impuesto sobre Hidrocarburos.</strong> Es un impuesto especial que se paga por litro, no en porcentaje. La Ley 38/1992 (artículo 50) fija para cada producto un tipo general y un tipo especial, que se suman:</p>
+  <p><strong>1. El Impuesto sobre Hidrocarburos.</strong> Es un impuesto especial que se paga por litro, no en porcentaje. La Ley 38/1992 (artículo 50) fija para cada producto un tipo general y un tipo especial, que se suman. Estos son los tipos normales y los que se aplican hoy, {fechaLarga(FECHA)}:</p>
   <div class="tabla"><table>
-    <thead><tr><th>Producto (epígrafe)</th><th class="n">Tipo general</th><th class="n">Tipo especial</th><th class="n">Total por litro</th></tr></thead>
+    <thead><tr><th>Producto (epígrafe)</th><th class="n">Tipo normal (Ley 38/1992)</th><th class="n">Tipo vigente hoy</th><th class="n">Por litro hoy</th></tr></thead>
     <tbody>
-      <tr><td>Gasolina sin plomo 98 o más (1.2.1)</td><td class="n">431,92 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,50392 €</td></tr>
-      <tr><td>Resto de gasolinas sin plomo, como la 95 (1.2.2)</td><td class="n">400,69 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,47269 €</td></tr>
-      <tr><td>Gasóleo de uso general (1.3)</td><td class="n">307 €/1.000 l</td><td class="n">72 €/1.000 l</td><td class="n">0,379 €</td></tr>
-      <tr><td>Gasóleo bonificado, «gasóleo B» (1.4)</td><td class="n">78,71 €/1.000 l</td><td class="n">18 €/1.000 l</td><td class="n">0,09671 €</td></tr>
+      {[['g98', 'Gasolina sin plomo 98 o más (1.2.1)'], ['g95', 'Resto de gasolinas sin plomo, como la 95 (1.2.2)'], ['ga', 'Gasóleo de uso general (1.3)'], ['gb', 'Gasóleo bonificado, «gasóleo B» (1.4)']].map(([k, n]) => (
+        <tr><td>{n}</td><td class="n">{num(NORMAL.tipos[k][0], 2)} + {num(NORMAL.tipos[k][1], 2)} €/1.000 l</td><td class="n">{num(F.tipos[k][0], 2)} + {num(F.tipos[k][1], 2)} €/1.000 l</td><td class="n">{eur(F.ieh[k], 5)}</td></tr>))}
+      <tr><td>GLP de automoción (1.6)</td><td class="n">{num(NORMAL.glp, 2)} €/t</td><td class="n">{num(F.glp, 2)} €/t</td><td class="n">—</td></tr>
     </tbody>
   </table></div>
-  <p><strong>2. El IVA</strong>, al tipo general del 21 %. Ojo: el IVA se calcula sobre el precio que ya incluye el impuesto sobre hidrocarburos, así que también se paga IVA sobre ese impuesto.</p>
+  <p><strong>2. El IVA</strong>, hoy al <strong>{F.iva} %</strong> (el tipo general de la Ley 37/1992). Ojo: el IVA se calcula sobre el precio que ya incluye el impuesto sobre hidrocarburos, así que también se paga IVA sobre ese impuesto.</p>
+
+  <h2>Los cambios de 2026: rebajas temporales</h2>
+  <p>Desde el 22 de marzo de 2026, con el Plan Integral de Respuesta a la Crisis en Oriente Medio, el Gobierno ha rebajado el impuesto sobre hidrocarburos mediante tres reales decretos-ley, y entre el 22 de marzo y el 30 de junio también bajó el IVA de los carburantes al 10 %. Las rebajas de cada mes dependían de que el IPC del carburante subiera más de un 15 % interanual (cláusulas de salvaguarda, con los datos del INE). Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
+  <TablaFiscal carb={['g95', 'ga', 'gb']} hoy={FECHA} />
+  <p>Cuando termina una rebaja sin prórroga, se vuelve automáticamente a los tipos normales de la ley. {F.rebaja && <>La actual acaba el {fechaLarga(F.hasta)}.</>} Revisamos estos tipos cada día con nuestro bot y los contrastamos con el BOE.</p>
+
   <h2>Desglose de un litro con los precios de hoy</h2>
-  <p>Media de las gasolineras de la Península y Baleares (sin Canarias, Ceuta ni Melilla):</p>
+  <p>Media de las gasolineras de la Península y Baleares (sin Canarias, Ceuta ni Melilla), con los tipos vigentes hoy:</p>
   <div class="tabla"><table>
-    <thead><tr><th>Carburante</th><th class="n">Precio medio</th><th class="n">IVA (21 %)</th><th class="n">Imp. hidrocarburos</th><th class="n">Producto, logística y margen</th><th class="n">% impuestos</th></tr></thead>
-    <tbody>{filas.map((r) => <tr><td>{nombres[r.f]}</td><td class="n">{eur(r.p)}</td><td class="n">{eur(r.iva)}</td><td class="n">{eur(r.ieh)}</td><td class="n">{eur(r.resto)}</td><td class="n">{r.pct.toFixed(1).replace('.', ',')} %</td></tr>)}</tbody>
+    <thead><tr><th>Carburante</th><th class="n">Precio medio</th><th class="n">IVA ({F.iva} %)</th><th class="n">Imp. hidrocarburos</th><th class="n">Producto, logística y margen</th><th class="n">% impuestos</th></tr></thead>
+    <tbody>{filas.map((r) => <tr><td>{nombres[r.f]}</td><td class="n">{eur(r.p)}</td><td class="n">{eur(r.iva)}</td><td class="n">{eur(r.ieh)}</td><td class="n">{eur(r.resto)}</td><td class="n">{num(r.pct, 1)} %</td></tr>)}</tbody>
   </table></div>
-  <p>Cómo se calcula: el IVA es el precio menos el precio dividido entre 1,21. El impuesto sobre hidrocarburos es la cantidad fija de la tabla anterior. Lo que queda es lo que cobran la petrolera y la gasolinera por el producto (incluidos los biocarburantes obligatorios), el transporte, el almacenamiento y su margen.</p>
+  <p>Cómo se calcula: el IVA es el precio menos el precio dividido entre {num(F.factorIva, 2)}. El impuesto sobre hidrocarburos es la cantidad por litro vigente hoy. Lo que queda es lo que cobran la petrolera y la gasolinera por el producto (incluidos los biocarburantes obligatorios), el transporte, el almacenamiento y su margen.</p>
+
   <h2>Tres consecuencias prácticas</h2>
   <ul>
-    <li><strong>Cuando el carburante baja, el peso de los impuestos sube.</strong> Como el impuesto sobre hidrocarburos es fijo por litro, si el precio cae, ese impuesto pesa más sobre el total (y al revés).</li>
-    <li><strong>El diésel paga menos impuesto especial que la gasolina</strong>: {c(IEH.g95 - IEH.ga)} céntimos menos por litro que la gasolina 95, y con IVA, {c((IEH.g95 - IEH.ga) * 1.21)} céntimos.</li>
-    <li><strong>Parte de lo que cuesta de más la 98 son impuestos</strong>: paga {c(IEH.g98 - IEH.g95)} céntimos más de impuesto especial por litro que la 95 ({c((IEH.g98 - IEH.g95) * 1.21)} céntimos con IVA). Lo explicamos en <a href="/guias/gasolina-95-o-98/">gasolina 95 o 98</a>.</li>
+    <li><strong>Cuando el carburante baja, el peso de los impuestos sube.</strong> Como el impuesto sobre hidrocarburos es una cantidad por litro, si el precio cae, ese impuesto pesa más sobre el total (y al revés).</li>
+    <li><strong>El diésel paga menos impuesto especial que la gasolina</strong>: hoy, {c(F.ieh.g95 - F.ieh.ga)} céntimos menos por litro que la gasolina 95 ({c((F.ieh.g95 - F.ieh.ga) * F.factorIva)} con IVA). Con los tipos normales la diferencia es de {c(NORMAL.ieh.g95 - NORMAL.ieh.ga)} céntimos.</li>
+    <li><strong>Parte de lo que cuesta de más la 98 son impuestos</strong>: hoy paga {c(F.ieh.g98 - F.ieh.g95)} céntimos más de impuesto especial por litro que la 95 ({c((F.ieh.g98 - F.ieh.g95) * F.factorIva)} con IVA). Lo explicamos en <a href="/guias/gasolina-95-o-98/">gasolina 95 o 98</a>.</li>
   </ul>
   <h2>¿Y en Canarias, Ceuta y Melilla?</h2>
   <p>Allí no se aplican ni el IVA ni el impuesto sobre hidrocarburos estatal: tienen tributos propios. Por eso sus precios medios suelen ser los más bajos del <a href="/gasolineras/">ranking de provincias</a> y no conviene compararlos directamente con los de la Península.</p>
-  <p><small>Los tipos se han comprobado en el texto consolidado del BOE el 16 de noviembre de 2026. Si la ley cambia, actualizaremos esta guía.</small></p>
+  <p><small>Tipos contrastados con el BOE, la Agencia Tributaria y el IPC del INE el 16 de noviembre de 2026 (fichero de tipos por fecha que revisa nuestro bot a diario).</small></p>
 </Guia>

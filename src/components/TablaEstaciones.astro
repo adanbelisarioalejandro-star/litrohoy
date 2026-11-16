@@ -1,5 +1,5 @@
 ---
-import { NOMBRE, eur, titulo, direccion, nombreMunicipio } from '../lib/datos.mjs';
+import { num, NOMBRE, eur, titulo, direccion, nombreMunicipio } from '../lib/datos.mjs';
 interface Props { est: any[]; conMunicipio?: boolean; conKm?: boolean; max?: number }
 const { est, conMunicipio = false, conKm = false, max = Infinity } = Astro.props;
 const MARGEN = { D: 'margen derecho', I: 'margen izquierdo' };
@@ -19,13 +19,13 @@ const nombre = (e) => (e.r.length <= 3 ? e.r : titulo(e.r));
   <thead><tr><th>Gasolinera</th>{cols.map((f) => <th class="n">{NOMBRE[f].replace(' (diésel)', '')}</th>)}</tr></thead>
   <tbody>{g.map((e) => (
     <tr>
-      <td>{conKm && <><strong>km {e.km.toLocaleString('es-ES')}</strong>{MARGEN[e.mg] && ` · ${MARGEN[e.mg]}`}<br /></>}<strong>{nombre(e)}</strong><br /><small>{direccion(e.d)}{conMunicipio && ` · ${nombreMunicipio(e.m)}`}<br />Horario: {e.h}</small></td>
+      <td>{conKm && <><strong>km {e.km.toLocaleString('es-ES', { useGrouping: 'always' })}</strong>{MARGEN[e.mg] && ` · ${MARGEN[e.mg]}`}<br /></>}<strong>{nombre(e)}</strong><br /><small>{direccion(e.d)}{conMunicipio && ` · ${nombreMunicipio(e.m)}`}<br />Horario: {e.h}</small></td>
       {cols.some((f) => e[f])
         ? cols.map((f) => <td class:list={['n', { top1: e[f] && e[f] === minimo[f] }]}>{e[f] ? eur(e[f]) : '—'}</td>)
         : <td colspan={cols.length}><small>Sin precio publicado de estos carburantes</small></td>}
     </tr>))}
   </tbody>
 </table></div>;
-  return gi === 0 ? tabla : <details class="mas"><summary>Ver las otras {g.length} gasolineras</summary>{tabla}</details>;
+  return gi === 0 ? tabla : <details class="mas"><summary>Ver las otras {num(g.length)} gasolineras</summary>{tabla}</details>;
 })}
-{est.length > max && <p><small>Se muestran las {max} más baratas de {est.length} gasolineras.</small></p>}
+{est.length > max && <p><small>Se muestran las {max} más baratas de {num(est.length)} gasolineras.</small></p>}

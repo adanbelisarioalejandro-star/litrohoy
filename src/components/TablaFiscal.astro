@@ -1,0 +1,25 @@
+---
+// Cronología de los tipos del impuesto sobre hidrocarburos e IVA (data/fiscalidad.json), con su norma oficial.
+import { FISCAL, NORMAL } from '../lib/fiscal.mjs';
+import { eur, fechaLarga } from '../lib/datos.mjs';
+interface Props { carb?: ('g95' | 'g98' | 'ga' | 'gb')[]; hoy?: string }
+const { carb = ['g95', 'ga'], hoy } = Astro.props;
+const NOM = { g95: 'Gasolina 95', g98: 'Gasolina 98', ga: 'Gasóleo A', gb: 'Gasóleo B' };
+const litro = (t) => (t[0] + t[1]) / 1000;
+const corto = (d) => fechaLarga(d).replace(/ de \d{4}$/, '');
+const filas = [
+  { periodo: 'Tipo normal (sin rebaja)', norma: FISCAL.normal.norma, url: FISCAL.normal.url, iva: FISCAL.normal.iva, tipos: FISCAL.normal.tipos },
+  ...FISCAL.periodos.map((p) => ({ periodo: `Del ${corto(p.desde)} al ${fechaLarga(p.hasta)}`, ...p, vigente: hoy && p.desde <= hoy && hoy <= p.hasta })),
+];
+---
+<div class="tabla"><table>
+  <thead><tr><th>Periodo y norma</th><th class="n">IVA</th>{carb.map((c) => <th class="n">{NOM[c]}<br /><small>imp. hidrocarburos/l</small></th>)}</tr></thead>
+  <tbody>{filas.map((f) => (
+    <tr class:list={[{ vigente: f.vigente }]}>
+      <td><strong>{f.periodo}</strong>{f.vigente && ' (vigente)'}<br /><small><a href={f.url} rel="nofollow noopener" target="_blank">{f.norma}</a></small></td>
+      <td class="n">{f.iva} %</td>
+      {carb.map((c) => <td class="n">{eur(litro(f.tipos[c]), 5)}{f.tipos !== NORMAL.tipos && <><br /><small>{eur(litro(f.tipos[c]) - litro(FISCAL.normal.tipos[c]), 3).replace(/^(?!-)/, '+')}</small></>}</td>)}
+    </tr>))}
+  </tbody>
+</table></div>
+<style>.vigente td { background: var(--fondo-suave, #eef6ef); }</style>

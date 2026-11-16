@@ -1,7 +1,7 @@
 ---
 import Guia from '../../components/Guia.astro';
 import Grafico from '../../components/Grafico.astro';
-import { serieNacional, ultimosDias, municipios, media } from '../../lib/datos.mjs';
+import { serieNacional, ultimosDias, municipios, media, num, dispersionMunicipal, MIN_GASOLINERAS_COMPARAR } from '../../lib/datos.mjs';
 const DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'];
 // Desviación de cada día frente a la media móvil centrada de 7 días (quita la tendencia general), en céntimos
 function porDia(f) {
@@ -19,7 +19,7 @@ const mejor = orden.reduce((a, b) => (ga.dias[b] < ga.dias[a] ? b : a));
 const peor = orden.reduce((a, b) => (ga.dias[b] > ga.dias[a] ? b : a));
 const rango = ga.dias[peor] - ga.dias[mejor];
 // diferencia típica entre la gasolinera más cara y la más barata de un mismo municipio (5+ gasolineras)
-const dispersion = media(municipios.filter((m) => m.stats.ga?.n >= 5).map((m) => (m.stats.ga.max - m.stats.ga.min) * 100));
+const dispersion = dispersionMunicipal.maxMin * 100;
 const c = (x) => (x > 0 ? '+' : '') + x.toFixed(2).replace('.', ',');
 ---
 <Guia slug="mejor-dia-para-repostar" conDatos fuentes={[['Histórico diario de precios: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/']]}>
@@ -32,7 +32,7 @@ const c = (x) => (x > 0 ? '+' : '') + x.toFixed(2).replace('.', ',');
   </table></div>
   <p><small>Cada cifra indica cuánto se aparta de media ese día del precio de su semana (media móvil centrada de 7 días). Así se elimina el efecto de que el precio general suba o baje durante el periodo. Un valor negativo significa más barato que su semana.</small></p>
   <h2>Lo que importa de verdad: qué gasolinera eliges</h2>
-  <p>En los municipios con cinco o más gasolineras, la diferencia media entre la más cara y la más barata para el diésel es hoy de <strong>{dispersion.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Es decir, elegir bien la estación ahorra mucho más que elegir el día. Consulta la tabla de tu <a href="/gasolineras/">provincia o municipio</a> o usa el <a href="/buscador/">buscador por cercanía</a>.</p>
+  <p>En los {num(dispersionMunicipal.n)} municipios con {MIN_GASOLINERAS_COMPARAR} o más gasolineras con diésel, la diferencia media entre la más cara y la más barata para el diésel es hoy de <strong>{dispersion.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Es decir, elegir bien la estación ahorra mucho más que elegir el día. Consulta la tabla de tu <a href="/gasolineras/">provincia o municipio</a> o usa el <a href="/buscador/">buscador por cercanía</a>.</p>
   <h2>Evolución reciente</h2>
   <Grafico titulo="Precio medio diario en España, últimos 90 días" series={[{ nombre: 'Gasóleo A', puntos: ultimosDias(serieNacional('ga'), 90) }, { nombre: 'Gasolina 95', puntos: ultimosDias(serieNacional('g95'), 90) }]} />
   <h2>Limitaciones</h2>

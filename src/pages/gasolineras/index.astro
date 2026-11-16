@@ -3,7 +3,7 @@ import Base from '../../layouts/Base.astro';
 import Migas from '../../components/Migas.astro';
 import Fuente from '../../components/Fuente.astro';
 import Anuncio from '../../components/Anuncio.astro';
-import { provincias, comunidades, nacional, serieProvincia, variacion, eur, pct } from '../../lib/datos.mjs';
+import { num, provincias, comunidades, nacional, serieProvincia, variacion, eur, pct } from '../../lib/datos.mjs';
 const orden = [...provincias].sort((a, b) => (a.stats.ga?.media ?? 9) - (b.stats.ga?.media ?? 9));
 const nGa = nacional.stats.ga.media;
 const dif = orden.at(-1).stats.ga.media - orden[0].stats.ga.media;
@@ -16,7 +16,7 @@ const dif = orden.at(-1).stats.ga.media - orden[0].stats.ga.media;
     <thead><tr><th class="n">#</th><th>Provincia</th><th class="n">Gasóleo A</th><th class="n">30 días</th><th class="n">Gasolina 95</th><th class="n">Gasolineras</th></tr></thead>
     <tbody>{orden.map((p, i) => { const v = variacion(serieProvincia(p.id, 'ga'), 30); return (
       <tr><td class="n">{i + 1}</td><td><a href={p.url}>{p.nombre}</a></td><td class="n">{eur(p.stats.ga?.media)}</td>
-        <td class:list={['n', v > 0 ? 'sube' : 'baja']}>{pct(v)}</td><td class="n">{eur(p.stats.g95?.media)}</td><td class="n">{p.est.length}</td></tr>); })}
+        <td class:list={['n', v > 0 ? 'sube' : 'baja']}>{pct(v)}</td><td class="n">{eur(p.stats.g95?.media)}</td><td class="n">{num(p.est.length)}</td></tr>); })}
     </tbody>
   </table></div>
   <p><small>En Canarias, Ceuta y Melilla no se aplican ni el IVA ni el impuesto especial estatal sobre hidrocarburos (tienen tributos propios), lo que explica en buena parte sus precios más bajos. Más detalle en la guía <a href="/guias/impuestos-gasolina-diesel/">cuántos impuestos pagas por cada litro</a>.</small></p>

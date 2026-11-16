@@ -6,7 +6,7 @@ import TablaEstaciones from '../../components/TablaEstaciones.astro';
 import Mapa from '../../components/Mapa.astro';
 import Calculadora from '../../components/Calculadora.astro';
 import Anuncio from '../../components/Anuncio.astro';
-import { carreterasPublicadas, provPorId, nacional, eur, comparar, titulo, nombreMunicipio, fechaLarga, stats, FECHA, NOMBRE } from '../../lib/datos.mjs';
+import { num, carreterasPublicadas, provPorId, nacional, eur, comparar, titulo, nombreMunicipio, fechaLarga, stats, FECHA, NOMBRE } from '../../lib/datos.mjs';
 
 export function getStaticPaths() {
   return carreterasPublicadas.map((c) => ({ params: { carretera: c.slug }, props: { c } }));
@@ -27,15 +27,15 @@ const tramos = c.provs.map((id) => {
   return { p: provPorId[id], n: est.length, desde: est[0].km, hasta: est.at(-1).km, s: stats(est) };
 });
 const tramoBarato = tramos.filter((t) => t.s[principal] && t.n >= 2).sort((a, b) => a.s[principal].media - b.s[principal].media);
-const km = (v) => v.toLocaleString('es-ES');
+const km = (v) => v.toLocaleString('es-ES', { useGrouping: 'always' });
 const title = `Gasolineras de la ${c.nombre}: precios hoy por kilómetro`;
-const description = `Las ${c.est.length} gasolineras de la ${c.nombre} ordenadas por punto kilométrico, con el precio de hoy. ${NOMBRE[principal]} desde ${eur(s[principal].min)}/l en el km ${km(baratas[0].km)}.`;
+const description = `Las ${num(c.est.length)} gasolineras de la ${c.nombre} ordenadas por punto kilométrico, con el precio de hoy. ${NOMBRE[principal]} desde ${eur(s[principal].min)}/l en el km ${km(baratas[0].km)}.`;
 ---
 <Base title={title} description={description}>
   <Migas items={[['Carreteras', '/carreteras/'], [c.nombre, c.url]]} />
   <h1>Gasolineras de la {c.nombre}: precio de hoy por punto kilométrico</h1>
   <p class="resumen">
-    {`Hoy, ${fechaLarga(FECHA)}, hay `}<strong>{c.est.length} gasolineras</strong>{` en la ${c.nombre} entre el km ${km(kmMin)} y el km ${km(kmMax)}, repartidas por ${c.provs.length === 1 ? `la provincia de ${tramos[0].p.nombre}` : `${c.provs.length} provincias`}. `}
+    {`Hoy, ${fechaLarga(FECHA)}, hay `}<strong>{num(c.est.length)} gasolineras</strong>{` en la ${c.nombre} entre el km ${km(kmMin)} y el km ${km(kmMax)}, repartidas por ${c.provs.length === 1 ? `la provincia de ${tramos[0].p.nombre}` : `${c.provs.length} provincias`}. `}
     {s.ga && <>El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong> en la {c.nombre}, {comparar(s.ga.media, nacional.stats.ga.media, 'España')}. </>}
     {s.g95 && <>El precio medio de la gasolina 95 es <strong>{eur(s.g95.media)}/l</strong>, {comparar(s.g95.media, nacional.stats.g95.media, 'España')}. </>}
     La más barata para {carb} es <strong>{nombreEst(baratas[0])}</strong>, en el km {km(baratas[0].km)} ({lugar(baratas[0])}), a {eur(baratas[0][principal])}/l: {eur(dif)} menos por litro que la más cara de la vía, o {eur(dif * 50, 2)} en un depósito de 50 litros.
@@ -52,7 +52,7 @@ const description = `Las ${c.est.length} gasolineras de la ${c.nombre} ordenadas
     <h2>Precio de la {c.nombre} por provincia</h2>
     <div class="tabla"><table>
       <thead><tr><th>Provincia</th><th class="n">Tramo</th><th class="n">Gasolineras</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th></tr></thead>
-      <tbody>{tramos.map((t) => <tr><td><a href={t.p.url}>{t.p.nombre}</a></td><td class="n">km {km(t.desde)}–{km(t.hasta)}</td><td class="n">{t.n}</td><td class="n">{t.s.ga ? eur(t.s.ga.media) : '—'}</td><td class="n">{t.s.g95 ? eur(t.s.g95.media) : '—'}</td></tr>)}</tbody>
+      <tbody>{tramos.map((t) => <tr><td><a href={t.p.url}>{t.p.nombre}</a></td><td class="n">km {km(t.desde)}–{km(t.hasta)}</td><td class="n">{num(t.n)}</td><td class="n">{t.s.ga ? eur(t.s.ga.media) : '—'}</td><td class="n">{t.s.g95 ? eur(t.s.g95.media) : '—'}</td></tr>)}</tbody>
     </table></div>
   </>}
   <Anuncio />

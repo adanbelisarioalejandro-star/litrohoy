@@ -57,6 +57,19 @@ jobs:
       - name: 1. Actualizar datos oficiales
         run: node scripts/update.mjs
 
+      - name: Comprobar tipos fiscales vigentes (data/fiscalidad.json)
+        run: node scripts/fiscal.mjs
+
+      - name: Abrir aviso si una rebaja fiscal caduca o ha caducado
+        if: hashFiles('aviso-fiscal.md') != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="$(cat aviso-fiscal-titulo.txt)"
+          # un solo aviso abierto por caducidad: no se repite cada día
+          ya=$(gh issue list --label fiscal --state open --search "\"$titulo\" in:title" --json number --jq '.[0].number' || true)
+          if [ -z "$ya" ]; then gh label create fiscal --color FBCA04 2>/dev/null || true; gh issue create --title "$titulo" --label fiscal --body-file aviso-fiscal.md; fi
+
       - name: 4. Medir (solo lectura)
         if: steps.semana.outputs.si == 'true'
         env:

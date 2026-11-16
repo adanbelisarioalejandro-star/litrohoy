@@ -1,8 +1,7 @@
 ---
 import Guia from '../../components/Guia.astro';
-import { municipios, media } from '../../lib/datos.mjs';
-const grandes = municipios.filter((m) => m.stats.ga?.n >= 5);
-const disp = media(grandes.map((m) => (m.stats.ga.max - m.stats.ga.min) * 100));
+import { municipios, media, num, dispersionMunicipal, MIN_GASOLINERAS_COMPARAR } from '../../lib/datos.mjs';
+const disp = dispersionMunicipal.maxMin * 100;
 const ahorro = (disp / 100) * 50 * 3 * 12;
 ---
 <Guia slug="trucos-ahorrar-carburante" conDatos fuentes={[
@@ -14,7 +13,7 @@ const ahorro = (disp / 100) * 50 * 3 * 12;
 ]}>
   <p>Hay dos formas de gastar menos en carburante: pagar menos por cada litro y gastar menos litros. Estas son las que de verdad funcionan, con cifras de fuentes oficiales.</p>
   <h2>1. Elige bien la gasolinera (el ahorro más fácil)</h2>
-  <p>En los {grandes.length} municipios con cinco o más gasolineras, la diferencia media entre la más barata y la más cara para el diésel es hoy de <strong>{disp.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Con 3 depósitos de 50 litros al mes, eso son unos <strong>{ahorro.toFixed(0)} € al año</strong>. Busca la tuya en la página de tu <a href="/gasolineras/">municipio o provincia</a> o con el <a href="/buscador/">buscador por cercanía</a>.</p>
+  <p>En los {num(dispersionMunicipal.n)} municipios con {MIN_GASOLINERAS_COMPARAR} o más gasolineras con diésel, la diferencia media entre la más barata y la más cara para el diésel es hoy de <strong>{disp.toFixed(1).replace('.', ',')} céntimos por litro</strong>. Con 3 depósitos de 50 litros al mes, eso son unos <strong>{num(ahorro)} € al año</strong>. Busca la tuya en la página de tu <a href="/gasolineras/">municipio o provincia</a> o con el <a href="/buscador/">buscador por cercanía</a>.</p>
   <p>Lo que no merece la pena: hacer muchos kilómetros extra para ahorrar unos céntimos, ni obsesionarse con el día de la semana (lo analizamos en <a href="/guias/mejor-dia-para-repostar/">¿qué día es más barato repostar?</a>).</p>
   <h2>2. Conducción eficiente: entre un 10 y un 25 % menos</h2>
   <p>Según el IDAE, conducir de forma eficiente puede ahorrar entre un 10 % y un 25 % de combustible. Las claves:</p>

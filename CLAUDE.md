@@ -35,5 +35,6 @@ Cada día: tests → update → build → QC (`--corregir` despublica los munici
 ## Reglas de contenido (no negociables)
 - Nada de texto de relleno generado en masa ni de páginas puerta: cada frase de una página de datos sale de sus números reales y, si no hay datos suficientes, la página no se publica.
 - Crecimiento gradual: como máximo 40 municipios por semana, y solo si pasan el QC (3 o más gasolineras con precio, 14 o más días de histórico, similitud menor de 0,9).
+- Impuestos: nunca escribas tipos a mano en una guía. Están por fecha en `data/fiscalidad.json` (`src/lib/fiscal.mjs`); el bot avisa (issue `fiscal`) cuando una rebaja caduca, y el QC falla si la diferencia de impuestos gasóleo A − B no cuadra con la real.
 - Las guías citan sus fuentes oficiales. Cualquier cifra nueva hay que contrastarla con el BOE, el MITECO, la DGT o el IDAE antes de publicarla.
 - Antes de dar algo por hecho: `npm test`, `npm run build` (QC sin fallos) y `node scripts/vigilar.mjs dist`, y revisa en el navegador a 390 px.

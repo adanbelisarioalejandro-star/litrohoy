@@ -128,3 +128,9 @@ test('Boletín Petrolero UE: localiza columnas de Portugal y España por nombre 
   assert.throws(() => serieWOB('<sst></sst>', '<row r="1"></row>'), /faltan columnas/);
 });
 
+test('QC: falla si la diferencia de impuestos gasóleo A − B no cuadra con la real', () => {
+  const g = (fis, real) => pagina('/guias/gasoleo-b-agricola/', `${texto(450)}<p data-qc-fiscal-dif="${fis}" data-qc-real-dif="${real}">x</p>`);
+  assert.deepEqual(revisar('/guias/gasoleo-b-agricola/', g(0.19118, 0.173)).fallos, []); // tipos rebajados vigentes
+  assert.match(revisar('/guias/gasoleo-b-agricola/', g(0.34157, 0.173)).fallos.join(), /no cuadra/); // tipos normales con rebaja en vigor
+});
+

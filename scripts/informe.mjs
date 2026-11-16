@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 
 const D = process.env.DATA_DIR ?? 'data';
 const leer = (f, def) => (existsSync(f) ? JSON.parse(readFileSync(f, 'utf8')) : def);
-const eur = (x) => (x == null ? '—' : x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' }));
+const eur = (x) => (x == null ? '—' : x.toLocaleString('es-ES', { useGrouping: 'always', style: 'currency', currency: 'EUR' }));
 
 /** Genera los dos documentos a partir del estado. Pura (testeable). */
 export function generar({ hoy, fechaDatos, nEstaciones, municipios, candidatos, qc, met, bloq, retiradas, avisos, env }) {

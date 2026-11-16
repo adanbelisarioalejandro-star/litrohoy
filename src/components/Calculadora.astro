@@ -18,13 +18,13 @@ const datos = Object.fromEntries(fuels.map((f) => [f, [stats[f].min, +stats[f].m
 <script is:inline>
   document.querySelectorAll('[data-calc]').forEach((s) => {
     const d = JSON.parse(s.dataset.calc), q = (n) => s.querySelector(`[name=${n}]`), out = s.querySelector('output');
-    const e = (x) => x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    const e = (x) => x.toLocaleString('es-ES', { useGrouping: 'always', style: 'currency', currency: 'EUR' });
     const calc = () => {
       const [min, med] = d[q('f').value], l = +q('l').value, r = +q('r').value, p = +q('p').value || med;
       if (!(l > 0 && r > 0)) { out.textContent = 'Introduce litros y repostajes válidos.'; return; }
       const litros = l * r * 12, ahorro = (p - min) * litros;
       out.innerHTML = ahorro > 0
-        ? `Repostando a <strong>${min.toFixed(3).replace('.', ',')} €/l</strong> ahorrarías <strong>${e(ahorro)} al año</strong> (${e(ahorro / 12)} al mes) en ${litros.toLocaleString('es-ES')} litros.`
+        ? `Repostando a <strong>${min.toFixed(3).replace('.', ',')} €/l</strong> ahorrarías <strong>${e(ahorro)} al año</strong> (${e(ahorro / 12)} al mes) en ${litros.toLocaleString('es-ES', { useGrouping: 'always' })} litros.`
         : 'Ya pagas el precio más bajo de la zona o menos.';
     };
     q('f').addEventListener('change', () => { q('p').value = d[q('f').value][1]; calc(); });

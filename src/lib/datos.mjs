@@ -24,8 +24,10 @@ export const MIN_ESTACIONES_MARCA = 25;
 
 // ---------- utilidades ----------
 export const media = (xs) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
-export const eur = (p, d = 3) => (p == null ? '—' : p.toLocaleString('es-ES', { minimumFractionDigits: d, maximumFractionDigits: d }) + ' €');
-export const pct = (x, d = 1) => (x == null ? '—' : (x > 0 ? '+' : '') + x.toLocaleString('es-ES', { maximumFractionDigits: d, minimumFractionDigits: d }) + ' %');
+/** Número con separador de miles siempre (es-ES no agrupa los de 4 cifras por defecto: 5497 -> 5.497). */
+export const num = (x, d = 0) => (x == null ? '—' : x.toLocaleString('es-ES', { useGrouping: 'always', minimumFractionDigits: d, maximumFractionDigits: d }));
+export const eur = (p, d = 3) => (p == null ? '—' : p.toLocaleString('es-ES', { useGrouping: 'always', minimumFractionDigits: d, maximumFractionDigits: d }) + ' €');
+export const pct = (x, d = 1) => (x == null ? '—' : (x > 0 ? '+' : '') + x.toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: d, minimumFractionDigits: d }) + ' %');
 export const fechaLarga = (iso) => new Date(iso + 'T12:00:00Z').toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 const MENORES = new Set(['de', 'del', 'la', 'las', 'los', 'el', 'y', 'a', 'en', 'e', 'o', 'km', 'n']);
 export const titulo = (s) => s.toLowerCase().replace(/[\p{L}\d.ºª]+/gu, (w, i) =>
@@ -213,9 +215,24 @@ export function motivosNoApta(m) {
 }
 export const municipiosPublicados = municipios.filter((m) => m.publicada && !motivosNoApta(m).length);
 
+// ---------- municipios comparables (criterio único para guías e informe) ----------
+// Para hablar de "cuánto cambia el precio entre gasolineras de un mismo municipio" usamos siempre los municipios con
+// al menos 5 gasolineras con precio de gasóleo A.
+export const MIN_GASOLINERAS_COMPARAR = 5;
+export const municipiosComparables = municipios.filter((m) => m.stats.ga?.n >= MIN_GASOLINERAS_COMPARAR);
+/** Diferencias medias de gasóleo A en esos municipios (€/l): más cara − más barata, y media local − más barata. */
+export const dispersionMunicipal = {
+  n: municipiosComparables.length,
+  maxMin: media(municipiosComparables.map((m) => m.stats.ga.max - m.stats.ga.min)),
+  mediaMin: media(municipiosComparables.map((m) => m.stats.ga.media - m.stats.ga.min)),
+};
+
 // ---------- marcas ----------
-const normMarca = (r) => r.toUpperCase().replace(/\s+/g, ' ').trim();
-const nombreMarca = (r) => (r.length <= 3 ? r : titulo(r));
+// Cepsa pasó a llamarse Moeve en 2024: en la fuente conviven los dos rótulos y se cuentan como una sola marca
+const ALIAS_MARCA = [[/^(CEPSA|MOEVE)( ?[-–] ?(CEPSA|MOEVE))?$/, 'MOEVE']];
+const NOMBRE_MARCA = { MOEVE: 'Moeve (antes Cepsa)', BONAREA: 'bonÀrea' };
+const normMarca = (r) => { const k = r.toUpperCase().replace(/\s+/g, ' ').trim(); return ALIAS_MARCA.find(([re]) => re.test(k))?.[1] ?? k; };
+const nombreMarca = (r) => NOMBRE_MARCA[r] ?? (r.length <= 3 ? r : titulo(r));
 export const marcas = (() => {
   const g = new Map();
   for (const e of estaciones) {
@@ -238,13 +255,13 @@ export function comparar(valor, ref, nombreRef) {
   if (valor == null || ref == null) return '';
   const d = ((valor - ref) / ref) * 100;
   if (Math.abs(d) < 0.25) return `prácticamente igual que la media de ${nombreRef}`;
-  return `un ${Math.abs(d).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % ${d < 0 ? 'más barato' : 'más caro'} que la media de ${nombreRef}`;
+  return `un ${Math.abs(d).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 1 })} % ${d < 0 ? 'más barato' : 'más caro'} que la media de ${nombreRef}`;
 }
 export function tendencia(serie, dias = 30) {
   const v = variacion(serie, dias);
   if (v == null) return null;
   if (Math.abs(v) < 0.3) return `se ha mantenido estable en los últimos ${dias} días (${pct(v)})`;
-  return `ha ${v > 0 ? 'subido' : 'bajado'} un ${Math.abs(v).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % en los últimos ${dias} días`;
+  return `ha ${v > 0 ? 'subido' : 'bajado'} un ${Math.abs(v).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 1 })} % en los últimos ${dias} días`;
 }
 
 // ---------- carreteras ----------

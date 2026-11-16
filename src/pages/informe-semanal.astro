@@ -5,7 +5,7 @@ import Migas from '../components/Migas.astro';
 import Fuente from '../components/Fuente.astro';
 import Grafico from '../components/Grafico.astro';
 import Anuncio from '../components/Anuncio.astro';
-import { provincias, marcas, municipios, nacional, serieNacional, serieProvincia, ultimosDias, variacion, eur, pct, media, fechaLarga, FECHA, NOMBRE } from '../lib/datos.mjs';
+import { provincias, marcas, municipios, dispersionMunicipal, MIN_GASOLINERAS_COMPARAR, num, nacional, serieNacional, serieProvincia, ultimosDias, variacion, eur, pct, media, fechaLarga, FECHA, NOMBRE } from '../lib/datos.mjs';
 
 const desde = new Date(new Date(FECHA).getTime() - 7 * 864e5).toISOString().slice(0, 10);
 const cent = (precio, v) => (precio - precio / (1 + v / 100)) * 100; // variación en céntimos a partir del % y el precio actual
@@ -15,11 +15,9 @@ const rGa = ranking('ga'), rG95 = ranking('g95');
 const vNac = { ga: variacion(serieNacional('ga'), 7), g95: variacion(serieNacional('g95'), 7) };
 const sube = (v) => (v > 0 ? 'ha subido' : 'ha bajado');
 const mGa = [...marcas].filter((m) => m.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
-// ahorro: en cada municipio con 3+ gasolineras con diésel, diferencia entre su media y su gasolinera más barata
-const conVarias = municipios.filter((m) => m.stats.ga?.n >= 3);
-const ahorro = media(conVarias.map((m) => m.stats.ga.media - m.stats.ga.min));
-const ahorroMax = media(conVarias.map((m) => m.stats.ga.max - m.stats.ga.min));
-const mayor = [...conVarias].sort((a, b) => (b.stats.ga.max - b.stats.ga.min) - (a.stats.ga.max - a.stats.ga.min)).slice(0, 5);
+// ahorro: mismo criterio que las guías (municipios con 5+ gasolineras con diésel; datos.mjs)
+const ahorro = dispersionMunicipal.mediaMin, ahorroMax = dispersionMunicipal.maxMin;
+const mayor = [...municipios.filter((m) => m.stats.ga?.n >= MIN_GASOLINERAS_COMPARAR)].sort((a, b) => (b.stats.ga.max - b.stats.ga.min) - (a.stats.ga.max - a.stats.ga.min)).slice(0, 5);
 // tablas: 5 que más suben y 5 que más bajan (null = separador)
 const tablas = [['el diésel', rGa], ['la gasolina 95', rG95]].map(([n, r]) => [n, [...r.slice(0, 5), null, ...r.slice(-5)]]);
 // "del 9 al 16 de noviembre de 2026" (o con mes/año completo si la semana cruza de mes)
@@ -29,11 +27,11 @@ const title = `Informe semanal de precios de la gasolina y el diésel, ${rango}`
 <Base title={title} description={`Qué provincias suben y bajan más esta semana, qué marcas son más baratas y cuánto se ahorra eligiendo bien la gasolinera. Datos oficiales ${rango}.`}>
   <Migas items={[['Informe semanal', '/informe-semanal/']]} />
   <h1>Informe semanal de precios de carburantes</h1>
-  <p class="resumen">{rango[0].toUpperCase() + rango.slice(1)}, según los precios oficiales de las {nacional.stats.ga.n.toLocaleString('es-ES')} gasolineras con diésel de España.
+  <p class="resumen">{rango[0].toUpperCase() + rango.slice(1)}, según los precios oficiales de las {nacional.stats.ga.n.toLocaleString('es-ES', { useGrouping: 'always' })} gasolineras con diésel de España.
     {vNac.ga != null && <> El gasóleo A {sube(vNac.ga)} un {pct(Math.abs(vNac.ga)).replace('+', '')} en la semana y cuesta de media <strong>{eur(nacional.stats.ga.media)}/l</strong>.</>}
     {vNac.g95 != null && <> La gasolina 95 {sube(vNac.g95)} un {pct(Math.abs(vNac.g95)).replace('+', '')} y su precio medio es <strong>{eur(nacional.stats.g95.media)}/l</strong>.</>}
     {rGa.length > 1 && <> Por provincias, donde {rGa[0].v > 0 ? 'más ha subido' : 'menos ha bajado'} el diésel es {rGa[0].p.nombre} ({pct(rGa[0].v)}) y donde {rGa.at(-1).v < 0 ? 'más ha bajado' : 'menos ha subido'}, {rGa.at(-1).p.nombre} ({pct(rGa.at(-1).v)}).</>}
-    {' '}En un municipio con varias gasolineras, repostar en la más barata en lugar de en una de precio medio ahorra de media <strong>{eur(ahorro)} por litro</strong> de diésel, {eur(ahorro * 50, 2)} en un depósito de 50 litros.</p>
+    {' '}En los municipios con {MIN_GASOLINERAS_COMPARAR} o más gasolineras, repostar en la más barata en lugar de en una de precio medio ahorra de media <strong>{eur(ahorro)} por litro</strong> de diésel, {eur(ahorro * 50, 2)} en un depósito de 50 litros.</p>
   <div class="cifras">
     {(['ga', 'g95'] as const).map((f) => <div class="cifra"><small>{NOMBRE[f]} · media España</small><strong>{eur(nacional.stats[f].media)}</strong><br />{vNac[f] != null && <em class={vNac[f] > 0 ? 'sube' : 'baja'}>7 días {pct(vNac[f])}</em>}</div>)}
     <div class="cifra"><small>Ahorro medio por depósito</small><strong>{eur(ahorro * 50, 2)}</strong><br /><em>50 l de diésel, más barata vs. media local</em></div>
@@ -53,11 +51,11 @@ const title = `Informe semanal de precios de la gasolina y el diésel, ${rango}`
   <Anuncio />
 
   <h2>Marcas más baratas hoy (gasóleo A)</h2>
-  <ol>{mGa.slice(0, 5).map((m) => <li><a href={m.url}>{m.nombre}</a>: {eur(m.stats.ga.media)}/l de media en {m.est.length} estaciones</li>)}</ol>
+  <ol>{mGa.slice(0, 5).map((m) => <li><a href={m.url}>{m.nombre}</a>: {eur(m.stats.ga.media)}/l de media en {num(m.est.length)} estaciones</li>)}</ol>
   <p>La más cara de las marcas con página propia es <a href={mGa.at(-1).url}>{mGa.at(-1).nombre}</a> ({eur(mGa.at(-1).stats.ga.media)}/l). La media de cada marca depende también de las provincias en las que está. <a href="/marcas/">Ver el ranking completo →</a></p>
 
   <h2>Cuánto se ahorra eligiendo gasolinera</h2>
-  <p>En los {conVarias.length.toLocaleString('es-ES')} municipios con tres o más gasolineras con diésel, la diferencia media entre la más barata y la más cara es de {eur(ahorroMax)} por litro ({eur(ahorroMax * 50, 2)} por depósito). Donde más se nota hoy:</p>
+  <p>En los {num(dispersionMunicipal.n)} municipios con {MIN_GASOLINERAS_COMPARAR} o más gasolineras con diésel, la diferencia media entre la más barata y la más cara es de {eur(ahorroMax)} por litro ({eur(ahorroMax * 50, 2)} por depósito). Donde más se nota hoy:</p>
   <ol>{mayor.map((m) => <li>{m.publicada ? <a href={m.url}>{m.nombre}</a> : m.nombre} ({provincias.find((p) => p.id === m.prov).nombre}): de {eur(m.stats.ga.min)} a {eur(m.stats.ga.max)}, {eur(m.stats.ga.max - m.stats.ga.min)} de diferencia</li>)}</ol>
   <p><small>Cómo se calcula: variación entre el precio medio oficial de hoy y el de hace 7 días; el ahorro compara, en cada municipio, la media de sus gasolineras con la más barata. Detalles en la <a href="/metodologia/">metodología</a>.</small></p>
   <Fuente />

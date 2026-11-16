@@ -1,6 +1,6 @@
 ---
 import Guia from '../../components/Guia.astro';
-import { provincias, municipios, media, eur } from '../../lib/datos.mjs';
+import { provincias, municipios, media, eur, num } from '../../lib/datos.mjs';
 const fuera = new Set(['35', '38', '51', '52']);
 const pen = provincias.filter((p) => !fuera.has(p.id) && p.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
 const dif = pen.at(-1).stats.ga.media - pen[0].stats.ga.media;
@@ -24,7 +24,7 @@ const brecha = (tramos[0].media - tramos[3].media) * 100;
   <p>Hemos agrupado los municipios según cuántas gasolineras tienen y calculado el precio medio del diésel en cada grupo:</p>
   <div class="tabla"><table>
     <thead><tr><th>Gasolineras en el municipio</th><th class="n">Municipios</th><th class="n">Estaciones</th><th class="n">Diésel medio</th></tr></thead>
-    <tbody>{tramos.map((r) => <tr><td>{r.t}</td><td class="n">{r.municipios}</td><td class="n">{r.est}</td><td class="n">{eur(r.media)}</td></tr>)}</tbody>
+    <tbody>{tramos.map((r) => <tr><td>{r.t}</td><td class="n">{num(r.municipios)}</td><td class="n">{num(r.est)}</td><td class="n">{eur(r.media)}</td></tr>)}</tbody>
   </table></div>
   <p>{brecha > 0
     ? `En los municipios con una sola gasolinera, el diésel cuesta de media ${brecha.toFixed(1).replace('.', ',')} céntimos más que en los que tienen diez o más.`

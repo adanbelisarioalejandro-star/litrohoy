@@ -26,7 +26,7 @@ const kmD = (5.0 * pGa) / 100, kmG = (6.5 * pG95) / 100;
     (() => { const s = document.getElementById('ckm'), v = (n) => +s.querySelector(`[name=${n}]`).value, o = s.querySelector('output');
       const f = () => { const d = v('cd') * v('pd') / 100, g = v('cg') * v('pg') / 100, k = v('km');
         if (!(d > 0 && g > 0 && k > 0)) { o.textContent = 'Revisa los datos.'; return; }
-        const e = (x) => x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+        const e = (x) => x.toLocaleString('es-ES', { useGrouping: 'always', style: 'currency', currency: 'EUR' });
         o.innerHTML = `Diésel: <strong>${(d * 100).toFixed(2).replace('.', ',')} cént./km</strong> (${e(d * k)} al año). Gasolina: <strong>${(g * 100).toFixed(2).replace('.', ',')} cént./km</strong> (${e(g * k)} al año). Diferencia: <strong>${e(Math.abs(g - d) * k)} al año</strong> a favor del ${d < g ? 'diésel' : 'gasolina'}.`; };
       s.addEventListener('input', f); f(); })();
   </script>

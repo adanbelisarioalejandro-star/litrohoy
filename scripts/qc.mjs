@@ -5,6 +5,8 @@ import { readFileSync, writeFileSync, readdirSync, statSync, existsSync } from '
 import { join } from 'node:path';
 
 export const UMBRAL_SIMILITUD = 0.9;
+// Diferencia máxima admitida (€/l) entre la diferencia de impuestos gasóleo A − B que afirma una guía y la real de precios
+export const TOLERANCIA_FISCAL = 0.06;
 const MIN_PALABRAS = { datos: 250, guia: 400, otra: 120 };
 const NOINDEX = /<meta name="robots" content="noindex/;
 
@@ -64,6 +66,10 @@ export function revisar(url, html) {
     if (precios < 6) fallos.push(`datos insuficientes: solo ${precios} precios en la página`);
   }
   if (t === 'municipio' && !/<svg class="graf"/.test(html)) fallos.push('sin gráfico de evolución (falta histórico)');
+  // si la guía dice cuánto menos impuesto paga el gasóleo B, tiene que cuadrar con lo que se ve en los surtidores
+  const fis = html.match(/data-qc-fiscal-dif="([\d.]+)"/)?.[1], real = html.match(/data-qc-real-dif="([\d.]+)"/)?.[1];
+  if (fis && real && Math.abs(fis - real) > TOLERANCIA_FISCAL)
+    fallos.push(`la diferencia de impuestos gasóleo A − B de la guía (${(+fis).toFixed(3)} €/l) no cuadra con la diferencia real de precios (${(+real).toFixed(3)} €/l): revisa data/fiscalidad.json`);
   return { fallos, titulo, desc, texto, t };
 }
 

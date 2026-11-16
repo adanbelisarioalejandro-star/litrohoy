@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
 import Fuente from '../components/Fuente.astro';
 import Anuncio from '../components/Anuncio.astro';
-import { carreterasPublicadas, nacional, eur, media, MIN_ESTACIONES_CARRETERA } from '../lib/datos.mjs';
+import { num, carreterasPublicadas, nacional, eur, media, MIN_ESTACIONES_CARRETERA } from '../lib/datos.mjs';
 const lista = [...carreterasPublicadas].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es', { numeric: true }));
 const conGa = carreterasPublicadas.filter((c) => c.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
 const total = carreterasPublicadas.reduce((n, c) => n + c.est.length, 0);
@@ -12,13 +12,13 @@ const brecha = conGa.length ? media(conGa.map((c) => c.stats.ga.max - c.stats.ga
 <Base title="Gasolineras por carretera: precios de hoy en autovías y nacionales" description={`Precios de hoy de las gasolineras de ${carreterasPublicadas.length} autovías, autopistas y nacionales, ordenadas por punto kilométrico. Encuentra dónde repostar más barato en tu viaje.`}>
   <Migas items={[['Carreteras', '/carreteras/']]} />
   <h1>Gasolineras por carretera: dónde repostar más barato en ruta</h1>
-  <p class="resumen">Precios de hoy de {total} gasolineras situadas en {carreterasPublicadas.length} autovías, autopistas y carreteras nacionales, ordenadas por punto kilométrico.
+  <p class="resumen">Precios de hoy de {num(total)} gasolineras situadas en {carreterasPublicadas.length} autovías, autopistas y carreteras nacionales, ordenadas por punto kilométrico.
     {conGa.length > 1 && <>De las carreteras publicadas, la que tiene hoy el gasóleo A más barato de media es la <a href={conGa[0].url}>{conGa[0].nombre}</a> ({eur(conGa[0].stats.ga.media)}/l) y la más cara, la <a href={conGa.at(-1).url}>{conGa.at(-1).nombre}</a> ({eur(conGa.at(-1).stats.ga.media)}/l), frente a una media nacional de {eur(nacional.stats.ga.media)}/l. </>}
     {brecha > 0 && <>Dentro de una misma carretera, entre la gasolinera más barata y la más cara hay hoy de media {eur(brecha)} por litro de gasóleo A ({eur(brecha * 50, 2)} en un depósito de 50 litros). </>}
     Solo publicamos las carreteras con al menos {MIN_ESTACIONES_CARRETERA} gasolineras con precio cuya dirección oficial indica la vía y el kilómetro, y vamos añadiendo más cada semana.</p>
   <div class="tabla"><table>
     <thead><tr><th>Carretera</th><th class="n">Gasolineras</th><th class="n">Provincias</th><th class="n">Gasóleo A (media)</th><th class="n">Gasolina 95 (media)</th><th class="n">Diésel más barato</th></tr></thead>
-    <tbody>{lista.map((c) => <tr><td><a href={c.url}>{c.nombre}</a></td><td class="n">{c.est.length}</td><td class="n">{c.provs.length}</td><td class="n">{c.stats.ga ? eur(c.stats.ga.media) : '—'}</td><td class="n">{c.stats.g95 ? eur(c.stats.g95.media) : '—'}</td><td class="n">{c.stats.ga ? eur(c.stats.ga.min) : '—'}</td></tr>)}</tbody>
+    <tbody>{lista.map((c) => <tr><td><a href={c.url}>{c.nombre}</a></td><td class="n">{num(c.est.length)}</td><td class="n">{c.provs.length}</td><td class="n">{c.stats.ga ? eur(c.stats.ga.media) : '—'}</td><td class="n">{c.stats.g95 ? eur(c.stats.g95.media) : '—'}</td><td class="n">{c.stats.ga ? eur(c.stats.ga.min) : '—'}</td></tr>)}</tbody>
   </table></div>
   <Anuncio />
   <p>Planifica la parada con la tabla de cada carretera, que indica el kilómetro y el margen de cada gasolinera, o usa el <a href="/buscador/">buscador por cercanía</a>.</p>

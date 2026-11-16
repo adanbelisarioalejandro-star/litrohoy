@@ -1,7 +1,7 @@
 ---
 // Mapa de las gasolineras del municipio (OpenStreetMap + Leaflet alojado aquí). No carga nada hasta que se pulsa:
 // así no afecta a la velocidad (LCP/CLS) ni envía datos a OpenStreetMap sin que el usuario lo pida.
-import { eur, titulo, direccion } from '../lib/datos.mjs';
+import { num, eur, titulo, direccion } from '../lib/datos.mjs';
 interface Props { est: any[]; zona: string; principal: 'ga' | 'g95' }
 const { est, zona, principal } = Astro.props;
 const conPos = est.filter((e) => e.lat && e.lon);
@@ -15,7 +15,7 @@ const carb = principal === 'ga' ? 'gasóleo A' : 'gasolina 95';
 ---
 {conPos.length >= 2 && <section class="mapa-sec">
   <h2>Mapa de las gasolineras de {zona}</h2>
-  <p>{conPos.length} gasolineras situadas con las coordenadas oficiales del Ministerio. Color según el precio del {carb}:
+  <p>{num(conPos.length)} gasolineras situadas con las coordenadas oficiales del Ministerio. Color según el precio del {carb}:
     <span class="lv l0">verde</span>, el tercio más barato; <span class="lv l1">ámbar</span>, el intermedio; <span class="lv l2">rojo</span>, el más caro{precios.length < conPos.length && <>; <span class="lv l3">gris</span>, sin precio de {carb}</>}.</p>
   <div class="mapa" id="mapa" data-src="/vendor/leaflet-1.9.4/">
     <button type="button" id="mapa-btn">Mostrar mapa</button>

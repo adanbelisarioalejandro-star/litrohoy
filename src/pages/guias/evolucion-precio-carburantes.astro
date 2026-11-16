@@ -1,27 +1,61 @@
 ---
 import Guia from '../../components/Guia.astro';
 import Grafico from '../../components/Grafico.astro';
-import { serieNacional, variacion, eur, pct } from '../../lib/datos.mjs';
+import TablaFiscal from '../../components/TablaFiscal.astro';
+import { serieNacional, variacion, eur, pct, num, fechaLarga, FECHA } from '../../lib/datos.mjs';
+import { fiscal } from '../../lib/fiscal.mjs';
 const ga = serieNacional('ga'), g95 = serieNacional('g95');
-const mapa95 = Object.fromEntries(g95);
-// un punto por mes: el día 1 de cada mes disponible + el último dato
+const mapa95 = Object.fromEntries(g95), mapaGa = Object.fromEntries(ga);
+// un punto por mes: el día 1 (el histórico antiguo solo guarda ese día) + el último dato
 const meses = ga.filter(([d]) => d.endsWith('-01'));
 if (ga.at(-1)[0] !== meses.at(-1)?.[0]) meses.push(ga.at(-1));
 const max = ga.reduce((a, b) => (b[1] > a[1] ? b : a)), min = ga.reduce((a, b) => (b[1] < a[1] ? b : a));
-const mes = (d) => new Date(d + 'T12:00:00Z').toLocaleDateString('es-ES', { day: d.endsWith('-01') ? undefined : 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+const mesAnyo = (d) => fechaLarga(d).replace(/^1 de /, '');
 const v1 = variacion(ga, 365), v95 = variacion(g95, 365);
+// Salto de marzo a abril de 2026: cuánto se explica por los impuestos (RDL 7/2026) y cuánto por el mercado.
+// Con el mismo precio antes de impuestos del 1 de marzo, ¿cuánto costaría el litro con los impuestos del 1 de abril?
+const salto = ['2026-03-01', '2026-04-01'].every((d) => mapaGa[d] && mapa95[d]) && ['ga', 'g95'].map((f) => {
+  const [a, b] = ['2026-03-01', '2026-04-01'].map((d) => (f === 'ga' ? mapaGa : mapa95)[d]);
+  const fa = fiscal('2026-03-01'), fb = fiscal('2026-04-01');
+  const base = a / fa.factorIva - fa.ieh[f];
+  const efectoFiscal = (base + fb.ieh[f]) * fb.factorIva - a;
+  return { f, a, b, total: b - a, efectoFiscal, mercado: b - a - efectoFiscal };
+});
+const nom = { ga: 'gasóleo A', g95: 'gasolina 95' };
+const regimen = (d) => { const r = fiscal(d); return r.rebaja ? `Rebaja (IVA ${r.iva} %)` : `Normal (IVA ${r.iva} %)`; };
 ---
-<Guia slug="evolucion-precio-carburantes" conDatos fuentes={[['Histórico de precios por fecha: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/']]}>
-  <p>Así ha evolucionado el precio medio de la gasolina 95 y del gasóleo A en el conjunto de las gasolineras de España desde {mes(ga[0][0])}. {v1 != null && `En el último año, el diésel ha variado un ${pct(v1)} y la gasolina 95, un ${pct(v95)}.`}</p>
-  <Grafico titulo="Precio medio nacional (€/litro)" series={[{ nombre: 'Gasóleo A', puntos: ga }, { nombre: 'Gasolina 95', puntos: g95 }]} />
-  <p>En el periodo analizado, el diésel tocó su máximo el {mes(max[0])} ({eur(max[1])}/l) y su mínimo el {mes(min[0])} ({eur(min[1])}/l): una diferencia de {eur(max[1] - min[1])} por litro, {eur((max[1] - min[1]) * 50, 2)} en un depósito de 50 litros.</p>
-  <h2>Precio medio mes a mes</h2>
+<Guia slug="evolucion-precio-carburantes" conDatos fuentes={[
+  ['Histórico de precios por fecha: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
+  ['Real Decreto-ley 7/2026, de 20 de marzo (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-6544'],
+  ['Real Decreto-ley 18/2026, de 29 de junio (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-14112'],
+  ['Real Decreto-ley 25/2026, de 29 de septiembre (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20265'],
+  ['Agencia Tributaria: medidas fiscales del Real Decreto-ley 7/2026', 'https://sede.agenciatributaria.gob.es/Sede/todas-noticias/2026/marzo/23/medidas-materia-tributacion.html'],
+]}>
+  <p>Así ha evolucionado el precio medio de la gasolina 95 y del gasóleo A en el conjunto de las gasolineras de España desde {mesAnyo(ga[0][0])}. {v1 != null && `En el último año, el diésel ha variado un ${pct(v1)} y la gasolina 95, un ${pct(v95)}.`}</p>
+  <Grafico titulo="Precio medio nacional" series={[{ nombre: 'Gasóleo A', puntos: ga }, { nombre: 'Gasolina 95', puntos: g95 }]} />
+  <p>En los datos analizados (un dato oficial al mes hasta los últimos 90 días, y diario desde entonces), el diésel tocó su máximo el {fechaLarga(max[0])} ({eur(max[1])}/l) y su mínimo el {fechaLarga(min[0])} ({eur(min[1])}/l): una diferencia de {eur(max[1] - min[1])} por litro, {eur((max[1] - min[1]) * 50, 2)} en un depósito de 50 litros.</p>
+
+  <h2>Precio el día 1 de cada mes</h2>
+  <p>El histórico oficial que guardamos tiene un dato por mes (el día 1) hasta los últimos 90 días, así que esta tabla compara el precio de ese día, no la media del mes. La última fila es el dato más reciente.</p>
   <div class="tabla"><table>
-    <thead><tr><th>Fecha</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Diferencia</th></tr></thead>
-    <tbody>{[...meses].reverse().map(([d, v]) => <tr><td>{mes(d)}</td><td class="n">{eur(v)}</td><td class="n">{eur(mapa95[d])}</td><td class="n">{mapa95[d] ? eur(mapa95[d] - v) : '—'}</td></tr>)}</tbody>
+    <thead><tr><th>Fecha</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Diferencia</th><th>Impuestos ese día</th></tr></thead>
+    <tbody>{[...meses].reverse().map(([d, v]) => <tr><td>{fechaLarga(d)}</td><td class="n">{eur(v)}</td><td class="n">{eur(mapa95[d])}</td><td class="n">{mapa95[d] ? eur(mapa95[d] - v) : '—'}</td><td>{regimen(d)}</td></tr>)}</tbody>
   </table></div>
   <p><small>Media simple de todas las estaciones con precio ese día, incluidas Canarias, Ceuta y Melilla. Una diferencia negativa significa que el diésel está más caro que la gasolina.</small></p>
+
+  <h2>Los cambios fiscales de 2026</h2>
+  <p>En 2026 el precio no solo ha dependido del mercado: desde el 22 de marzo el Gobierno ha rebajado el impuesto sobre hidrocarburos con tres reales decretos-ley (7/2026, 18/2026 y 25/2026), y del 22 de marzo al 30 de junio también bajó el IVA de los carburantes del 21 % al 10 %. Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
+  <TablaFiscal carb={['g95', 'ga']} hoy={FECHA} />
+
+  {salto && <>
+    <h2>El salto de marzo a abril de 2026</h2>
+    <p>Entre el 1 de marzo y el 1 de abril de 2026 el gasóleo A pasó de {eur(salto[0].a)} a {eur(salto[0].b)} por litro ({eur(salto[0].total)}) y la gasolina 95, de {eur(salto[1].a)} a {eur(salto[1].b)} ({eur(salto[1].total)}). En medio, el 22 de marzo entró en vigor el Real Decreto-ley 7/2026, que bajó el IVA al 10 % y el impuesto sobre hidrocarburos.</p>
+    <p>Para separar los dos efectos, calculamos cuánto habría costado el litro el 1 de abril con el mismo precio antes de impuestos que el 1 de marzo y los impuestos nuevos:</p>
+    <ul>{salto.map((x) => <li><strong>{nom[x.f][0].toUpperCase() + nom[x.f].slice(1)}</strong>: la rebaja fiscal restó {eur(-x.efectoFiscal)} por litro, pero el precio antes de impuestos subió tanto que el litro acabó {eur(x.total)} más caro; es decir, el mercado lo encareció en unos {eur(x.mercado)} (IVA incluido).</li>)}</ul>
+    <p>Sin la rebaja, con esos mismos precios de mercado, la subida habría sido todavía mayor. Es un cálculo aproximado: el precio de cada estación no cambia exactamente el mismo día que los impuestos.</p>
+  </>}
+
   <h2>¿Qué mueve el precio?</h2>
-  <p>Una parte del precio es fija: el impuesto sobre hidrocarburos se paga por litro (lo explicamos en <a href="/guias/impuestos-gasolina-diesel/">cuántos impuestos pagas por cada litro</a>). La parte que varía responde sobre todo a la cotización internacional del crudo y de los productos refinados, al tipo de cambio entre el euro y el dólar y a los márgenes de distribución. Por eso las subidas y bajadas del petróleo llegan al surtidor de forma más suave: el impuesto fijo no cambia.</p>
+  <p>Una parte del precio son impuestos: el impuesto sobre hidrocarburos se paga por litro y el IVA, en porcentaje sobre todo lo demás (lo explicamos en <a href="/guias/impuestos-gasolina-diesel/">cuántos impuestos pagas por cada litro</a>). Normalmente el impuesto por litro está fijado por ley y no se mueve con el mercado, así que amortigua las subidas y bajadas del petróleo; en 2026, en cambio, sus rebajas temporales han movido también el precio final. La parte que varía con el mercado responde sobre todo a la cotización internacional del crudo y de los productos refinados, al tipo de cambio entre el euro y el dólar y a los márgenes de distribución.</p>
   <p>Para ver la evolución en tu zona, entra en tu <a href="/gasolineras/">provincia</a>: cada página tiene su propio gráfico.</p>
 </Guia>

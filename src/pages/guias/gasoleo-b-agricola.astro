@@ -1,20 +1,32 @@
 ---
 import Guia from '../../components/Guia.astro';
-import { estaciones, media, eur, provincias } from '../../lib/datos.mjs';
+import { estaciones, media, eur, num, fechaLarga, provincias, FECHA } from '../../lib/datos.mjs';
+import { fiscal, NORMAL } from '../../lib/fiscal.mjs';
+const F = fiscal(FECHA);
 const ambas = estaciones.filter((e) => e.gb && e.ga);
 const pGb = media(estaciones.filter((e) => e.gb).map((e) => e.gb));
-const dif = media(ambas.map((e) => e.ga - e.gb));
+const difs = ambas.map((e) => e.ga - e.gb).sort((a, b) => a - b);
+const dif = media(difs), mediana = difs[Math.floor(difs.length / 2)];
 const nGb = estaciones.filter((e) => e.gb).length;
 const top = provincias.map((p) => [p, p.est.filter((e) => e.gb).length]).sort((a, b) => b[1] - a[1]).slice(0, 5);
-const difImp = ((307 + 72) - (78.71 + 18)) / 1000;
+// diferencia de impuestos A − B por litro, IVA incluido (el IVA también grava el impuesto especial)
+const difImp = (r) => (r.ieh.ga - r.ieh.gb) * r.factorIva;
+const c = (x) => num(x * 100, 1);
 ---
 <Guia slug="gasoleo-b-agricola" conDatos fuentes={[
   ['Ley 38/1992, de Impuestos Especiales, arts. 50, 54 y 55 (BOE)', 'https://www.boe.es/buscar/act.php?id=BOE-A-1992-28741'],
+  ['Real Decreto-ley 25/2026, de 29 de septiembre, arts. 13 a 15 (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-20265'],
+  ['Real Decreto-ley 7/2026, de 20 de marzo, art. 38 (BOE)', 'https://www.boe.es/diario_boe/txt.php?id=BOE-A-2026-6544'],
+  ['INE: IPC de combustibles líquidos (cláusula de salvaguarda del gasóleo B)', 'https://www.ine.es/jaxiT3/Tabla.htm?t=76128'],
   ['Precios por estación: Ministerio para la Transición Ecológica y el Reto Demográfico', 'https://geoportalgasolineras.es/'],
 ]}>
-  <p>El gasóleo B, conocido como «gasóleo agrícola» o bonificado, es gasóleo que paga mucho menos impuesto especial porque solo puede usarse en determinados motores. Hoy lo venden <strong>{nGb.toLocaleString('es-ES')} gasolineras</strong>, a una media de <strong>{eur(pGb)}/l</strong>. En las estaciones que venden los dos, es {eur(dif)} por litro más barato que el gasóleo A.</p>
+  <p>El gasóleo B, conocido como «gasóleo agrícola» o bonificado, es gasóleo que paga mucho menos impuesto especial porque solo puede usarse en determinados motores. Hoy lo venden <strong>{num(nGb)} gasolineras</strong>, a una media de <strong>{eur(pGb)}/l</strong>. En las {num(ambas.length)} estaciones que venden los dos, es {eur(dif)} por litro más barato que el gasóleo A de media (la diferencia más habitual es de {eur(mediana)}).</p>
   <h2>Por qué es más barato</h2>
-  <p>La Ley 38/1992 fija un impuesto de 96,71 € por cada 1.000 litros para el gasóleo bonificado (epígrafe 1.4: 78,71 € de tipo general y 18 € de tipo especial), frente a 379 € del gasóleo de uso general. Es una diferencia de {(difImp * 100).toFixed(1).replace('.', ',')} céntimos por litro, y de {(difImp * 121).toFixed(1).replace('.', ',')} céntimos con IVA.</p>
+  <p>La Ley 38/1992 fija para el gasóleo bonificado (epígrafe 1.4) un impuesto normal de {num(NORMAL.tipos.gb[0], 2)} + {num(NORMAL.tipos.gb[1], 2)} € por cada 1.000 litros, frente a {num(NORMAL.tipos.ga[0], 2)} + {num(NORMAL.tipos.ga[1], 2)} € del gasóleo de uso general: con IVA, {c(difImp(NORMAL))} céntimos menos por litro.</p>
+  {F.rebaja
+    ? <p data-qc-fiscal-dif={difImp(F).toFixed(5)} data-qc-real-dif={mediana.toFixed(5)}>Hoy los dos tienen una rebaja temporal ({F.norma}, hasta el {fechaLarga(F.hasta)}): el gasóleo B paga {num(F.tipos.gb[0], 2)} + {num(F.tipos.gb[1], 2)} €/1.000 l y el gasóleo A, {num(F.tipos.ga[0], 2)} + {num(F.tipos.ga[1], 2)} €/1.000 l. Como la rebaja del gasóleo A es mayor, la diferencia de impuestos entre los dos se reduce hoy a <strong>{c(difImp(F))} céntimos por litro</strong> con IVA, y eso es lo que se ve en el surtidor: la diferencia real de precio más habitual es de {c(mediana)} céntimos.</p>
+    : <p data-qc-fiscal-dif={difImp(F).toFixed(5)} data-qc-real-dif={mediana.toFixed(5)}>Hoy se aplican esos tipos normales, y la diferencia real de precio más habitual entre los dos gasóleos es de {c(mediana)} céntimos por litro.</p>}
+  <p>Desde el 22 de marzo de 2026, el tipo del gasóleo B ha sido de 21 € por 1.000 litros (17,09 + 3,91), salvo en julio (39,93 €). El detalle está en la guía de <a href="/guias/impuestos-gasolina-diesel/">impuestos de los carburantes</a>.</p>
   <h2>Quién puede usarlo</h2>
   <p>Según el artículo 54.2 de la ley, el gasóleo con este tipo reducido puede usarse como carburante en todos los motores <strong>excepto</strong>:</p>
   <ul>
@@ -26,5 +38,5 @@ const difImp = ((307 + 72) - (78.71 + 18)) / 1000;
   <h2>¿Y si lo pongo en mi coche?</h2>
   <p>El artículo 55 de la ley considera <strong>infracción tributaria grave</strong> no respetar estas limitaciones. Es responsable el titular del vehículo que lo use o lo lleve en el depósito. El marcador permite detectarlo en una inspección. El ahorro no compensa el riesgo.</p>
   <h2>Provincias con más puntos de venta</h2>
-  <ul>{top.map(([p, n]) => <li><a href={p.url}>{p.nombre}</a>: {n} gasolineras</li>)}</ul>
+  <ul>{top.map(([p, n]) => <li><a href={p.url}>{p.nombre}</a>: {num(n)} gasolineras</li>)}</ul>
 </Guia>

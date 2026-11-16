@@ -10,7 +10,7 @@ import { europa, FRONTERA_PT, provPorId, nacional, eur, titulo, nombreMunicipio,
 
 const [semana, pt95, ptga, es95, esga] = europa.serie.at(-1);
 const dif = (pt, es) => ((pt - es) / es) * 100;
-const txt = (pt, es) => `${Math.abs(dif(pt, es)).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % ${pt > es ? 'más caro' : 'más barato'}`;
+const txt = (pt, es) => `${Math.abs(dif(pt, es)).toLocaleString('es-ES', { useGrouping: 'always', maximumFractionDigits: 1 })} % ${pt > es ? 'más caro' : 'más barato'}`;
 const hace1 = europa.serie.find(([f]) => f >= new Date(new Date(semana).getTime() - 365 * 864e5).toISOString().slice(0, 10));
 const provs = FRONTERA_PT.map((id) => provPorId[id]).filter((p) => p.stats.ga);
 const nombreEst = (e) => (e.r.length <= 3 ? e.r : titulo(e.r));

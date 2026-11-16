@@ -4,7 +4,7 @@ import Fuente from '../components/Fuente.astro';
 import Grafico from '../components/Grafico.astro';
 import Anuncio from '../components/Anuncio.astro';
 import { GUIAS } from '../lib/guias.mjs';
-import { nacional, provincias, comunidades, marcas, municipiosPublicados, carreterasPublicadas, serieNacional, variacion, eur, pct, fechaLarga, FECHA, NOMBRE, estaciones } from '../lib/datos.mjs';
+import { num, nacional, provincias, comunidades, marcas, municipiosPublicados, carreterasPublicadas, serieNacional, variacion, eur, pct, fechaLarga, FECHA, NOMBRE, estaciones } from '../lib/datos.mjs';
 const s = nacional.stats;
 const orden = (f) => [...provincias].filter((p) => p.stats[f]).sort((a, b) => a.stats[f].media - b.stats[f].media);
 const pGa = orden('ga');
@@ -14,7 +14,7 @@ const v = (f, d) => variacion(serieNacional(f), d);
 ---
 <Base title="Precio de la gasolina y el diésel hoy en España | LitroHoy" description={`Precio medio hoy: diésel ${eur(s.ga.media)}/l, gasolina 95 ${eur(s.g95.media)}/l. Encuentra la gasolinera más barata de tu municipio con datos oficiales actualizados cada día.`}>
   <h1>Precio de la gasolina y el diésel hoy</h1>
-  <p class="resumen">Precios oficiales de las <strong>{estaciones.length.toLocaleString('es-ES')} gasolineras</strong> de España a {fechaLarga(FECHA)}. El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong> y la gasolina 95, <strong>{eur(s.g95.media)}/l</strong>. Repostar en la gasolinera más barata de tu zona en lugar de en la más cara puede ahorrarte varios euros en cada depósito.</p>
+  <p class="resumen">Precios oficiales de las <strong>{estaciones.length.toLocaleString('es-ES', { useGrouping: 'always' })} gasolineras</strong> de España a {fechaLarga(FECHA)}. El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong> y la gasolina 95, <strong>{eur(s.g95.media)}/l</strong>. Repostar en la gasolinera más barata de tu zona en lugar de en la más cara puede ahorrarte varios euros en cada depósito.</p>
   <div class="cifras">
     {['ga', 'g95', 'g98', 'glp'].map((f) => { const a = v(f, 7), b = v(f, 365); return (
       <div class="cifra"><small>{NOMBRE[f]} · media España</small><strong>{eur(s[f].media)}</strong><br />
@@ -36,18 +36,18 @@ const v = (f, d) => variacion(serieNacional(f), d);
   <h2>Precio medio por marca</h2>
   <div class="tabla"><table>
     <thead><tr><th>Marca</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Estaciones</th></tr></thead>
-    <tbody>{mGa.slice(0, 10).map((m) => <tr><td><a href={m.url}>{m.nombre}</a></td><td class="n">{eur(m.stats.ga.media)}</td><td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{m.est.length}</td></tr>)}</tbody>
+    <tbody>{mGa.slice(0, 10).map((m) => <tr><td><a href={m.url}>{m.nombre}</a></td><td class="n">{eur(m.stats.ga.media)}</td><td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{num(m.est.length)}</td></tr>)}</tbody>
   </table></div>
   <p><a href="/marcas/">Todas las marcas →</a></p>
 
   {carreterasPublicadas.length > 0 && <>
     <h2>Gasolineras por carretera</h2>
-    <ul class="rejilla">{carreterasPublicadas.slice(0, 12).map((c) => <li><a href={c.url}>{c.nombre}</a> <small>({c.est.length}{c.stats.ga && `, diésel desde ${eur(c.stats.ga.min)}`})</small></li>)}</ul>
+    <ul class="rejilla">{carreterasPublicadas.slice(0, 12).map((c) => <li><a href={c.url}>{c.nombre}</a> <small>({num(c.est.length)}{c.stats.ga && `, diésel desde ${eur(c.stats.ga.min)}`})</small></li>)}</ul>
     <p><a href="/carreteras/">Todas las carreteras →</a></p>
   </>}
 
   <h2>Gasolineras por ciudad</h2>
-  <ul class="rejilla">{grandes.map((m) => <li><a href={m.url}>{m.nombre}</a> <small>({m.est.length})</small></li>)}</ul>
+  <ul class="rejilla">{grandes.map((m) => <li><a href={m.url}>{m.nombre}</a> <small>({num(m.est.length)})</small></li>)}</ul>
   <h2>Por comunidad autónoma</h2>
   <ul class="rejilla">{comunidades.map((c) => <li><a href={c.url}>{c.nombre}</a></li>)}</ul>
   <Anuncio />

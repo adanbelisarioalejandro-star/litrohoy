@@ -7,7 +7,7 @@ import TablaEstaciones from '../../../components/TablaEstaciones.astro';
 import Calculadora from '../../../components/Calculadora.astro';
 import Anuncio from '../../../components/Anuncio.astro';
 import Mapa from '../../../components/Mapa.astro';
-import { municipiosPublicados, munPorId, provPorId, ccaaPorId, municipios, serieMunicipio, serieProvincia, ultimosDias,
+import { num, municipiosPublicados, munPorId, provPorId, ccaaPorId, municipios, serieMunicipio, serieProvincia, ultimosDias,
   variacion, eur, pct, comparar, tendencia, titulo, direccion, fechaLarga, FECHA, NOMBRE } from '../../../lib/datos.mjs';
 
 export function getStaticPaths() {
@@ -30,7 +30,7 @@ const vecinos = municipiosPublicados.filter((x) => x.prov === m.prov && x.id !==
 const dif = (f) => (s[f] ? s[f].max - s[f].min : 0);
 const nombreEst = (e) => (e.r.length <= 3 ? e.r : titulo(e.r));
 const title = `Gasolineras baratas en ${m.nombre}${m.nombre !== p.nombre ? ` (${p.nombre})` : ''}: precios hoy`;
-const description = `Precios de hoy en las ${n} gasolineras de ${m.nombre}: ${s.g95 ? `gasolina 95 desde ${eur(s.g95.min)}/l` : ''}${s.g95 && s.ga ? ' y ' : ''}${s.ga ? `diésel desde ${eur(s.ga.min)}/l` : ''}. Comparativa, evolución y calculadora de ahorro.`;
+const description = `Precios de hoy en las ${num(n)} gasolineras de ${m.nombre}: ${s.g95 ? `gasolina 95 desde ${eur(s.g95.min)}/l` : ''}${s.g95 && s.ga ? ' y ' : ''}${s.ga ? `diésel desde ${eur(s.ga.min)}/l` : ''}. Comparativa, evolución y calculadora de ahorro.`;
 const jsonld = [{
   '@context': 'https://schema.org', '@type': 'ItemList', name: `Gasolineras en ${m.nombre}`,
   itemListElement: m.est.slice(0, 30).map((e, i) => ({ '@type': 'ListItem', position: i + 1, item: {
@@ -44,7 +44,7 @@ const jsonld = [{
   <Migas items={[...(c.uni ? [] : [[c.nombre, c.url]]), [p.nombre, p.url], [m.nombre, m.url]]} />
   <h1>Gasolineras en {m.nombre}: precio de la gasolina y el diésel hoy</h1>
   <p class="resumen">
-    {`Hoy, ${fechaLarga(FECHA)}, hay `}<strong>{n} gasolineras</strong>{` con precios publicados en ${m.nombre}${m.nombre !== p.nombre ? ` (${p.nombre})` : ''}.`}{m.est.length - n === 1 && ' Otra no publica precio de gasolina, diésel ni GLP.'}{m.est.length - n > 1 && ` Otras ${m.est.length - n} no publican precio de gasolina, diésel ni GLP.`}
+    {`Hoy, ${fechaLarga(FECHA)}, hay `}<strong>{num(n)} gasolineras</strong>{` con precios publicados en ${m.nombre}${m.nombre !== p.nombre ? ` (${p.nombre})` : ''}.`}{m.est.length - n === 1 && ' Otra no publica precio de gasolina, diésel ni GLP.'}{m.est.length - n > 1 && ` Otras ${num(m.est.length - n)} no publican precio de gasolina, diésel ni GLP.`}
     {s.ga && <>El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong>, {comparar(s.ga.media, p.stats.ga?.media, ref)}. </>}
     {s.g95 && <>La gasolina 95 sale a <strong>{eur(s.g95.media)}/l</strong> de media, {comparar(s.g95.media, p.stats.g95?.media, ref)}. </>}
     {s[principal].n > 1 && <>La más barata para {principal === 'ga' ? 'diésel' : 'gasolina 95'} es <strong>{nombreEst(s[principal].barata)}</strong> ({direccion(s[principal].barata.d)}), a {eur(s[principal].min)}/l: {eur(dif(principal))} menos por litro que la más cara. </>}
@@ -77,7 +77,7 @@ const jsonld = [{
 
   {vecinos.length > 0 && <>
     <h2>Otros municipios de {p.nombre}</h2>
-    <ul class="rejilla">{vecinos.map((v) => <li><a href={v.url}>{v.nombre}</a> <small>({v.est.length} gasolineras{v.stats.ga && `, diésel ${eur(v.stats.ga.media)}`})</small></li>)}</ul>
+    <ul class="rejilla">{vecinos.map((v) => <li><a href={v.url}>{v.nombre}</a> <small>({num(v.est.length)} gasolineras{v.stats.ga && `, diésel ${eur(v.stats.ga.media)}`})</small></li>)}</ul>
     <p><a href={p.url}>Ver todos los precios de {p.nombre} →</a></p>
   </>}
   <Fuente />

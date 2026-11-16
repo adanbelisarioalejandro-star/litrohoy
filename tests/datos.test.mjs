@@ -70,3 +70,20 @@ test('carreteras: red principal con punto kilométrico, nombres unificados', () 
   assert.equal(c('CAMINO A TOLEDO KM 3'), null);
 });
 
+test('fiscalidad: fichero válido, tipo vigente por fecha y aviso de caducidad', async () => {
+  const f = await import('../src/lib/fiscal.mjs');
+  assert.deepEqual(f.validarFiscal(), []);
+  const hoy = f.fiscal('2026-11-16');
+  assert.ok(hoy.rebaja);
+  assert.equal(+hoy.ieh.ga.toFixed(5), 0.179); // 144,99 + 34,01 (RDL 25/2026)
+  assert.equal(+hoy.ieh.g95.toFixed(5), 0.27269); // 231,15 + 41,54
+  assert.equal(hoy.iva, 21);
+  assert.equal(f.fiscal('2026-04-15').iva, 10); // RDL 7/2026
+  assert.equal(+f.fiscal('2027-01-05').ieh.ga.toFixed(5), 0.379); // sin rebaja: tipos normales de la Ley 38/1992
+  assert.equal(f.estadoFiscal('2026-11-16').aviso, null);
+  assert.equal(f.estadoFiscal('2026-12-24').aviso, 'caduca');
+  assert.equal(f.estadoFiscal('2027-01-02').aviso, 'caducada');
+  const malo = { normal: f.FISCAL.normal, periodos: [{ ...f.FISCAL.periodos[0], hasta: '2026-12-31' }, f.FISCAL.periodos[1]] };
+  assert.match(f.validarFiscal(malo).join(), /solapa/);
+});
+
