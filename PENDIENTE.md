@@ -12,6 +12,7 @@ Cada paso que cueste dinero o cree una cuenta necesita tu decisión. Nunca pegue
    ```
 4. Activa Pages con Actions: `Settings → Pages → Build and deployment → Source: GitHub Actions` (https://github.com/TU_USUARIO/litrohoy/settings/pages).
 5. Lanza el bot por primera vez: `Actions → bot → Run workflow` (marca "semanal"). Desde ahí se ejecuta solo cada día.
+   Mientras no exista la variable `SITE_URL` (paso 2.5), el bot actualiza datos, compila y pasa el control de calidad, pero **no despliega**: sin dominio propio los enlaces se romperían en `TU_USUARIO.github.io/litrohoy/`.
 
 ## 2. Dominio propio (DE PAGO: unos 10-12 € al año, necesita tu OK)
 AdSense exige un sitio propio; los subdominios `*.github.io` no suelen aprobarse. Propuesta: **litrohoy.com** (libre el 16-11-2026).

@@ -95,16 +95,20 @@ jobs:
           git diff --cached --quiet || git commit -m "bot: datos del $(date -u +%F)"
           git push
 
+      # Sin dominio (variable SITE_URL) no se despliega: en usuario.github.io/litrohoy/ los enlaces absolutos se romperían
       - uses: actions/upload-pages-artifact@v3
+        if: vars.SITE_URL != ''
         with:
           path: dist
 
       - name: Desplegar
         id: despliegue
+        if: vars.SITE_URL != ''
         uses: actions/deploy-pages@v4
 
       - name: 3. Vigilar que el sitio está en línea
-        run: node scripts/vigilar.mjs --online "${SITE_URL:-${{ steps.despliegue.outputs.page_url }}}"
+        if: vars.SITE_URL != ''
+        run: node scripts/vigilar.mjs --online "$SITE_URL"
 
       - name: Abrir aviso (issue) si algo ha fallado
         if: failure()
