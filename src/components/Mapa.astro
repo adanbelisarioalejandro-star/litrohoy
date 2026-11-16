@@ -1,0 +1,57 @@
+---
+// Mapa de las gasolineras del municipio (OpenStreetMap + Leaflet alojado aquí). No carga nada hasta que se pulsa:
+// así no afecta a la velocidad (LCP/CLS) ni envía datos a OpenStreetMap sin que el usuario lo pida.
+import { eur, titulo, direccion } from '../lib/datos.mjs';
+interface Props { est: any[]; zona: string; principal: 'ga' | 'g95' }
+const { est, zona, principal } = Astro.props;
+const conPos = est.filter((e) => e.lat && e.lon);
+const precios = conPos.map((e) => e[principal]).filter(Boolean).sort((a, b) => a - b);
+const corte = (q: number) => precios[Math.floor((precios.length - 1) * q)];
+const [t1, t2] = [corte(1 / 3), corte(2 / 3)];
+// nivel 0 = tercio más barato, 1 = medio, 2 = más caro, 3 = sin precio de ese carburante
+const nivel = (v?: number) => (!v ? 3 : v <= t1 ? 0 : v <= t2 ? 1 : 2);
+const datos = conPos.map((e) => [e.lat, e.lon, e.r.length <= 3 ? e.r : titulo(e.r), direccion(e.d), e.ga ? eur(e.ga) : '', e.g95 ? eur(e.g95) : '', nivel(e[principal])]);
+const carb = principal === 'ga' ? 'gasóleo A' : 'gasolina 95';
+---
+{conPos.length >= 2 && <section class="mapa-sec">
+  <h2>Mapa de las gasolineras de {zona}</h2>
+  <p>{conPos.length} gasolineras situadas con las coordenadas oficiales del Ministerio. Color según el precio del {carb}:
+    <span class="lv l0">verde</span>, el tercio más barato; <span class="lv l1">ámbar</span>, el intermedio; <span class="lv l2">rojo</span>, el más caro{precios.length < conPos.length && <>; <span class="lv l3">gris</span>, sin precio de {carb}</>}.</p>
+  <div class="mapa" id="mapa" data-src="/vendor/leaflet-1.9.4/">
+    <button type="button" id="mapa-btn">Mostrar mapa</button>
+    <small>Al mostrarlo se cargan imágenes de OpenStreetMap.</small>
+  </div>
+  <script type="application/json" id="mapa-datos" set:html={JSON.stringify(datos)} />
+</section>}
+
+<script>
+  const caja = document.getElementById('mapa');
+  document.getElementById('mapa-btn')?.addEventListener('click', async () => {
+    const base = caja!.dataset.src!;
+    caja!.textContent = 'Cargando mapa…';
+    const css = Object.assign(document.createElement('link'), { rel: 'stylesheet', href: base + 'leaflet.css' });
+    document.head.append(css);
+    await new Promise((ok, mal) => document.head.append(Object.assign(document.createElement('script'), { src: base + 'leaflet.js', onload: ok, onerror: mal })))
+      .catch(() => { caja!.textContent = 'No se ha podido cargar el mapa.'; throw new Error('leaflet'); });
+    const L = (window as any).L;
+    const puntos: any[] = JSON.parse(document.getElementById('mapa-datos')!.textContent!);
+    caja!.textContent = '';
+    caja!.style.display = 'block'; // el flex del botón interfiere con las capas de Leaflet
+    const mapa = L.map(caja, { scrollWheelZoom: false });
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">colaboradores de OpenStreetMap</a>' }).addTo(mapa);
+    const color = ['#1a7f37', '#b7791f', '#c62828', '#777'];
+    const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+    const capas = puntos.map(([lat, lon, nombre, dir, ga, g95, n]) => L.circleMarker([lat, lon], { radius: 8, weight: 2, color: '#fff', fillColor: color[n], fillOpacity: 0.95 })
+      .bindPopup(`<strong>${esc(nombre)}</strong><br>${esc(dir)}${ga ? `<br>Gasóleo A: ${ga}` : ''}${g95 ? `<br>Gasolina 95: ${g95}` : ''}<br><a rel="nofollow noopener" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lon}">Cómo llegar</a>`)
+      .addTo(mapa));
+    mapa.fitBounds(L.featureGroup(capas).getBounds().pad(0.1));
+  });
+</script>
+
+<style>
+  .mapa { height: 360px; border: 1px solid var(--borde, #ddd); border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .5rem; background: var(--fondo-suave, #f3f4f3); }
+  .mapa button { font: inherit; padding: .6rem 1.2rem; border-radius: 6px; border: 1px solid currentColor; background: #fff; cursor: pointer; }
+  .lv { font-weight: 600; }
+  .l0 { color: #1a7f37; } .l1 { color: #8a5a00; } .l2 { color: #c62828; } .l3 { color: #555; }
+</style>

@@ -15,7 +15,7 @@ export function enlacesRotos(dir) {
   };
   for (const p of paginas(dir)) {
     const html = readFileSync(p.fichero, 'utf8');
-    for (const [, a] of html.matchAll(/(?:href|src)="(\/[^"]*)"/g)) {
+    for (const [, a] of html.matchAll(/\s(?:href|src)="(\/[^"]*)"/g)) {
       if (a.startsWith('//')) continue;
       if (!existe(a)) rotos.push({ desde: p.url, a });
     }

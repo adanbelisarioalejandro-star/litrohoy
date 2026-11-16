@@ -6,6 +6,7 @@ import Grafico from '../../../components/Grafico.astro';
 import TablaEstaciones from '../../../components/TablaEstaciones.astro';
 import Calculadora from '../../../components/Calculadora.astro';
 import Anuncio from '../../../components/Anuncio.astro';
+import Mapa from '../../../components/Mapa.astro';
 import { municipiosPublicados, munPorId, provPorId, ccaaPorId, municipios, serieMunicipio, serieProvincia, ultimosDias,
   variacion, eur, pct, comparar, tendencia, titulo, direccion, fechaLarga, FECHA, NOMBRE } from '../../../lib/datos.mjs';
 
@@ -61,6 +62,7 @@ const jsonld = [{
   <h2>Precios de todas las gasolineras de {m.nombre}</h2>
   <p>Ordenadas de más barata a más cara por gasóleo A. En verde, el precio más bajo de cada carburante.</p>
   <TablaEstaciones est={m.est} />
+  <Mapa est={m.est} zona={m.nombre} principal={principal} />
   <Anuncio />
 
   <h2>Evolución del precio en {m.nombre}</h2>

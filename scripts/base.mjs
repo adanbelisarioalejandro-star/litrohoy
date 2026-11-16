@@ -12,7 +12,7 @@ export function conBase(texto, ext, base, site) {
     t = t.replace(new RegExp(`${s}/(?!${b.slice(1)}/)`, 'g'), `${site.replace(/\/$/, '')}${b}/`);
   }
   if (ext === '.html') {
-    t = t.replace(/(\s(?:href|src|action)=["'])\/(?![/])/g, `$1${b}/`);
+    t = t.replace(/(\s(?:href|src|action|data-src)=["'])\/(?![/])/g, `$1${b}/`);
     t = t.replace(/(fetch\(\s*[`'"])\/(?![/])/g, `$1${b}/`);
   }
   if (ext === '.json') t = t.replace(/"\/(?![/])/g, `"${b}/`);
