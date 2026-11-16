@@ -1,0 +1,12 @@
+---
+// Migas de pan + BreadcrumbList (schema.org). items: [[texto, url]] (el último es la página actual)
+interface Props { items: [string, string][] }
+const { items } = Astro.props;
+const site = Astro.site!.href.replace(/\/$/, '');
+const todos: [string, string][] = [['Inicio', '/'], ...items];
+const ld = { '@context': 'https://schema.org', '@type': 'BreadcrumbList', itemListElement: todos.map(([name, url], i) => ({ '@type': 'ListItem', position: i + 1, name, item: site + url })) };
+---
+<nav class="migas" aria-label="Migas de pan"><ol>
+  {todos.map(([t, u], i) => <li>{i < todos.length - 1 ? <a href={u}>{t}</a> : <span aria-current="page">{t}</span>}</li>)}
+</ol></nav>
+<script type="application/ld+json" set:html={JSON.stringify(ld)} />

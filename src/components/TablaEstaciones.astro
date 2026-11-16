@@ -1,0 +1,24 @@
+---
+import { FUELS, NOMBRE, eur, titulo } from '../lib/datos.mjs';
+interface Props { est: any[]; conMunicipio?: boolean; max?: number }
+const { est, conMunicipio = false, max = 200 } = Astro.props;
+const cols = ['g95', 'ga', 'g98', 'glp'].filter((f) => est.some((e) => e[f]));
+const minimo = Object.fromEntries(cols.map((f) => [f, Math.min(...est.filter((e) => e[f]).map((e) => e[f]))]));
+const filas = est.slice(0, max);
+// Las primeras 25 a la vista; el resto en un desplegable (mismo HTML indexable, página más manejable en móvil)
+const grupos = [filas.slice(0, 25), filas.slice(25)].filter((g) => g.length);
+---
+{grupos.map((g, gi) => {
+  const tabla = <div class="tabla"><table>
+  <thead><tr><th>Gasolinera</th>{cols.map((f) => <th class="n">{NOMBRE[f].replace(' (diésel)', '')}</th>)}<th>Horario</th></tr></thead>
+  <tbody>{g.map((e) => (
+    <tr>
+      <td><strong>{e.r.length <= 3 ? e.r : titulo(e.r)}</strong><br /><small>{titulo(e.d)}{conMunicipio && ` · ${e.m}`}</small></td>
+      {cols.map((f) => <td class:list={['n', { top1: e[f] && e[f] === minimo[f] }]}>{e[f] ? eur(e[f]) : '—'}</td>)}
+      <td><small>{e.h}</small></td>
+    </tr>))}
+  </tbody>
+</table></div>;
+  return gi === 0 ? tabla : <details class="mas"><summary>Ver las otras {g.length} gasolineras</summary>{tabla}</details>;
+})}
+{est.length > max && <p><small>Se muestran {max} de {est.length} gasolineras, ordenadas por precio del gasóleo A.</small></p>}

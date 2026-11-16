@@ -1,0 +1,17 @@
+---
+// Bloque de anuncio manual. Sin PUBLIC_ADSENSE_ID/SLOT no se pinta nada (en desarrollo, un hueco de referencia).
+// Reglas: siempre después del contenido principal, nunca más de 3 por página, etiqueta "Publicidad", altura reservada (sin CLS).
+const id = import.meta.env.PUBLIC_ADSENSE_ID;
+const slot = import.meta.env.PUBLIC_ADSENSE_SLOT;
+const dev = import.meta.env.DEV;
+---
+{id && slot ? (
+  <aside class="ad" aria-label="Publicidad"><span>Publicidad</span>
+    <ins class="adsbygoogle" style="display:block;min-height:280px" data-ad-client={id} data-ad-slot={slot} data-ad-format="auto" data-full-width-responsive="true"></ins>
+    <script is:inline>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+  </aside>
+) : dev && (
+  <aside class="ad" aria-hidden="true"><span>Publicidad (hueco reservado: define PUBLIC_ADSENSE_ID y PUBLIC_ADSENSE_SLOT)</span>
+    <div style="min-height:120px;border:2px dashed #ccc;border-radius:.5rem"></div>
+  </aside>
+)}

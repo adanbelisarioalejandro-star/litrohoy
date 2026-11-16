@@ -1,0 +1,51 @@
+---
+import Base from '../layouts/Base.astro';
+import Fuente from '../components/Fuente.astro';
+import Grafico from '../components/Grafico.astro';
+import Anuncio from '../components/Anuncio.astro';
+import { GUIAS } from '../lib/guias.mjs';
+import { nacional, provincias, comunidades, marcas, municipiosPublicados, serieNacional, variacion, eur, pct, fechaLarga, FECHA, NOMBRE, estaciones } from '../lib/datos.mjs';
+const s = nacional.stats;
+const orden = (f) => [...provincias].filter((p) => p.stats[f]).sort((a, b) => a.stats[f].media - b.stats[f].media);
+const pGa = orden('ga');
+const mGa = [...marcas].filter((m) => m.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
+const grandes = [...municipiosPublicados].sort((a, b) => b.est.length - a.est.length).slice(0, 24);
+const v = (f, d) => variacion(serieNacional(f), d);
+---
+<Base title="Precio de la gasolina y el diésel hoy en España | LitroHoy" description={`Precio medio hoy: diésel ${eur(s.ga.media)}/l, gasolina 95 ${eur(s.g95.media)}/l. Encuentra la gasolinera más barata de tu municipio con datos oficiales actualizados cada día.`}>
+  <h1>Precio de la gasolina y el diésel hoy</h1>
+  <p class="resumen">Precios oficiales de las <strong>{estaciones.length.toLocaleString('es-ES')} gasolineras</strong> de España a {fechaLarga(FECHA)}. El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong> y la gasolina 95, <strong>{eur(s.g95.media)}/l</strong>. Repostar en la gasolinera más barata de tu zona en lugar de en la más cara puede ahorrarte varios euros en cada depósito.</p>
+  <div class="cifras">
+    {['ga', 'g95', 'g98', 'glp'].map((f) => { const a = v(f, 7), b = v(f, 365); return (
+      <div class="cifra"><small>{NOMBRE[f]} · media España</small><strong>{eur(s[f].media)}</strong><br />
+        {a != null && <em class={a > 0 ? 'sube' : 'baja'}>7 días {pct(a)}</em>}{b != null && <em class={b > 0 ? 'sube' : 'baja'}> · 1 año {pct(b)}</em>}</div>); })}
+  </div>
+  <p><a href="/buscador/"><strong>Buscar las gasolineras más baratas cerca de mí →</strong></a></p>
+
+  <h2>Evolución del precio en España</h2>
+  <Grafico titulo="Precio medio nacional, últimos 2 años" series={[{ nombre: 'Gasóleo A', puntos: serieNacional('ga') }, { nombre: 'Gasolina 95', puntos: serieNacional('g95') }]} />
+
+  <h2>Provincias más baratas y más caras para el diésel</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Más baratas</th><th class="n">€/l</th><th>Más caras</th><th class="n">€/l</th></tr></thead>
+    <tbody>{[0, 1, 2, 3, 4].map((i) => { const a = pGa[i], b = pGa[pGa.length - 1 - i]; return <tr><td><a href={a.url}>{a.nombre}</a></td><td class="n">{eur(a.stats.ga.media)}</td><td><a href={b.url}>{b.nombre}</a></td><td class="n">{eur(b.stats.ga.media)}</td></tr>; })}</tbody>
+  </table></div>
+  <p><a href="/gasolineras/">Ranking completo de provincias →</a></p>
+  <Anuncio />
+
+  <h2>Precio medio por marca</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Marca</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Estaciones</th></tr></thead>
+    <tbody>{mGa.slice(0, 10).map((m) => <tr><td><a href={m.url}>{m.nombre}</a></td><td class="n">{eur(m.stats.ga.media)}</td><td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{m.est.length}</td></tr>)}</tbody>
+  </table></div>
+  <p><a href="/marcas/">Todas las marcas →</a></p>
+
+  <h2>Gasolineras por ciudad</h2>
+  <ul class="rejilla">{grandes.map((m) => <li><a href={m.url}>{m.nombre}</a> <small>({m.est.length})</small></li>)}</ul>
+  <h2>Por comunidad autónoma</h2>
+  <ul class="rejilla">{comunidades.map((c) => <li><a href={c.url}>{c.nombre}</a></li>)}</ul>
+  <Anuncio />
+  <h2>Guías para ahorrar en carburante</h2>
+  <ul>{GUIAS.map((g) => <li><a href={`/guias/${g.slug}/`}>{g.titulo}</a></li>)}</ul>
+  <Fuente />
+</Base>

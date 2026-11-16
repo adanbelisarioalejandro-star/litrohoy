@@ -1,0 +1,34 @@
+---
+// Calculadora de ahorro: cuánto ahorras al año repostando en la gasolinera más barata frente a la media de la zona.
+import { NOMBRE } from '../lib/datos.mjs';
+interface Props { stats: Record<string, { media: number; min: number; max: number }>; zona: string }
+const { stats, zona } = Astro.props;
+const fuels = ['ga', 'g95', 'g98', 'glp'].filter((f) => stats[f]);
+const datos = Object.fromEntries(fuels.map((f) => [f, [stats[f].min, +stats[f].media.toFixed(3), stats[f].max]]));
+---
+<section class="herramienta" data-calc={JSON.stringify(datos)}>
+  <h2 style="margin-top:0">Calculadora de ahorro en {zona}</h2>
+  <p>Calcula cuánto ahorras al año si repostas siempre en la gasolinera más barata de {zona} en lugar de pagar el precio medio.</p>
+  <label>Carburante <select name="f">{fuels.map((f) => <option value={f}>{NOMBRE[f]}</option>)}</select></label>
+  <label>Litros por repostaje <input name="l" type="number" inputmode="decimal" min="1" max="200" value="50" /></label>
+  <label>Repostajes al mes <input name="r" type="number" inputmode="decimal" min="0.1" max="60" step="0.5" value="3" /></label>
+  <label>Precio que pagas ahora (€/l) <input name="p" type="number" inputmode="decimal" min="0.3" max="5" step="0.001" /></label>
+  <output aria-live="polite"></output>
+</section>
+<script is:inline>
+  document.querySelectorAll('[data-calc]').forEach((s) => {
+    const d = JSON.parse(s.dataset.calc), q = (n) => s.querySelector(`[name=${n}]`), out = s.querySelector('output');
+    const e = (x) => x.toLocaleString('es-ES', { style: 'currency', currency: 'EUR' });
+    const calc = () => {
+      const [min, med] = d[q('f').value], l = +q('l').value, r = +q('r').value, p = +q('p').value || med;
+      if (!(l > 0 && r > 0)) { out.textContent = 'Introduce litros y repostajes válidos.'; return; }
+      const litros = l * r * 12, ahorro = (p - min) * litros;
+      out.innerHTML = ahorro > 0
+        ? `Repostando a <strong>${min.toFixed(3).replace('.', ',')} €/l</strong> ahorrarías <strong>${e(ahorro)} al año</strong> (${e(ahorro / 12)} al mes) en ${litros.toLocaleString('es-ES')} litros.`
+        : 'Ya pagas el precio más bajo de la zona o menos.';
+    };
+    q('f').addEventListener('change', () => { q('p').value = d[q('f').value][1]; calc(); });
+    s.addEventListener('input', calc);
+    q('p').value = d[q('f').value][1]; calc();
+  });
+</script>

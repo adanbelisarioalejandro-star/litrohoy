@@ -1,0 +1,45 @@
+---
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import Fuente from '../../components/Fuente.astro';
+import TablaEstaciones from '../../components/TablaEstaciones.astro';
+import Anuncio from '../../components/Anuncio.astro';
+import { marcas, nacional, eur, comparar, NOMBRE } from '../../lib/datos.mjs';
+
+export function getStaticPaths() {
+  return marcas.map((m) => ({ params: { marca: m.slug }, props: { clave: m.clave } }));
+}
+const m = marcas.find((x) => x.clave === Astro.props.clave)!;
+const s = m.stats;
+const rk = (f) => { const r = marcas.filter((x) => x.stats[f]).sort((a, b) => a.stats[f].media - b.stats[f].media); return [r.findIndex((x) => x.clave === m.clave) + 1, r.length]; };
+const [rGa, tGa] = rk('ga');
+const provs = m.provs.filter((x) => x.stats.ga);
+const baratasProv = [...provs].filter((x) => x.est.length >= 3).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
+const orden = [...m.est].sort((a, b) => (a.ga ?? 9) - (b.ga ?? 9));
+const title = `Precio de la gasolina y el diésel en gasolineras ${m.nombre} hoy`;
+const description = `${m.nombre}: ${m.est.length} gasolineras en España. Diésel a ${eur(s.ga?.media)}/l y gasolina 95 a ${eur(s.g95?.media)}/l de media hoy. Comparativa con otras marcas y por provincias.`;
+---
+<Base title={title} description={description}>
+  <Migas items={[['Marcas', '/marcas/'], [m.nombre, m.url]]} />
+  <h1>Precios en las gasolineras {m.nombre}</h1>
+  <p class="resumen">
+    Hoy hay <strong>{m.est.length} gasolineras {m.nombre}</strong> con precio publicado en {m.provs.length} provincias.
+    {s.ga && <>Su diésel cuesta de media <strong>{eur(s.ga.media)}/l</strong>, {comparar(s.ga.media, nacional.stats.ga.media, 'España')}; es la marca n.º {rGa} de {tGa} por precio del diésel (1 = la más barata, entre marcas con 25 o más estaciones). </>}
+    {s.g95 && <>La gasolina 95 sale a <strong>{eur(s.g95.media)}/l</strong>, {comparar(s.g95.media, nacional.stats.g95.media, 'España')}. </>}
+    {baratasProv.length > 1 && <>Donde más barata es {m.nombre} es en {baratasProv[0].prov.nombre} ({eur(baratasProv[0].stats.ga.media)}/l de diésel) y donde más cara, en {baratasProv.at(-1).prov.nombre} ({eur(baratasProv.at(-1).stats.ga.media)}/l).</>}
+  </p>
+  <div class="cifras">
+    {['g95', 'ga', 'g98', 'glp'].filter((f) => s[f]).map((f) => <div class="cifra"><small>{NOMBRE[f]} · media</small><strong>{eur(s[f].media)}</strong><br /><em>{s[f].n} estaciones</em></div>)}
+  </div>
+  <h2>{m.nombre} por provincias</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Provincia</th><th class="n">Estaciones</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Media provincial diésel</th></tr></thead>
+    <tbody>{provs.map((x) => <tr><td><a href={x.prov.url}>{x.prov.nombre}</a></td><td class="n">{x.est.length}</td><td class="n">{eur(x.stats.ga?.media)}</td><td class="n">{eur(x.stats.g95?.media)}</td><td class="n">{eur(x.prov.stats.ga?.media)}</td></tr>)}</tbody>
+  </table></div>
+  <Anuncio />
+  <h2>Las 15 gasolineras {m.nombre} con el diésel más barato</h2>
+  <TablaEstaciones est={orden} conMunicipio max={15} />
+  <p><a href="/marcas/">Comparar todas las marcas →</a> · <a href="/guias/gasolineras-low-cost-vs-marcas/">¿Compensan las gasolineras low cost?</a></p>
+  <Anuncio />
+  <Fuente />
+</Base>

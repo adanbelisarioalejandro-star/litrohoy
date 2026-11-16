@@ -1,0 +1,15 @@
+// Índice de guías (orden = orden de aparición). revisada: fecha de la última comprobación contra las fuentes.
+export const GUIAS = [
+  { slug: 'impuestos-gasolina-diesel', titulo: 'Cuántos impuestos pagas por cada litro de gasolina y diésel', descripcion: 'Desglose con los precios de hoy: impuesto especial sobre hidrocarburos (Ley 38/1992) e IVA, y por qué Canarias, Ceuta y Melilla son distintas.', revisada: '2026-11-16' },
+  { slug: 'mejor-dia-para-repostar', titulo: '¿Qué día de la semana es más barato repostar?', descripcion: 'Analizamos la media diaria de todas las gasolineras de España para ver si hay días más baratos.', revisada: '2026-11-16' },
+  { slug: 'gasolineras-low-cost-vs-marcas', titulo: 'Gasolineras low cost frente a marcas tradicionales: cuánto se ahorra', descripcion: 'Comparamos el precio medio de cada marca con datos oficiales de hoy.', revisada: '2026-11-16' },
+  { slug: 'gasolina-95-o-98', titulo: 'Gasolina 95 o 98: diferencias y cuándo compensa', descripcion: 'Qué significa el octanaje, qué dice el manual de tu coche y cuánto más cuesta la 98 hoy.', revisada: '2026-11-16' },
+  { slug: 'diesel-o-gasolina-coste-por-km', titulo: 'Diésel o gasolina: coste por kilómetro con los precios de hoy', descripcion: 'Calculadora de coste por kilómetro y ejemplo con precios medios reales.', revisada: '2026-11-16' },
+  { slug: 'por-que-cambia-el-precio-por-provincia', titulo: 'Por qué la gasolina no cuesta lo mismo en cada provincia', descripcion: 'Diferencias de precio entre provincias con datos oficiales y los factores que las explican.', revisada: '2026-11-16' },
+  { slug: 'evolucion-precio-carburantes', titulo: 'Evolución del precio de la gasolina y el diésel', descripcion: 'Cómo han cambiado los precios medios en España mes a mes, con datos oficiales.', revisada: '2026-11-16' },
+  { slug: 'etiquetas-combustible-e5-e10-b7', titulo: 'Qué significan E5, E10 y B7 en el surtidor', descripcion: 'El etiquetado europeo de carburantes explicado: qué combustible puede usar tu coche.', revisada: '2026-11-16' },
+  { slug: 'gasoleo-b-agricola', titulo: 'Gasóleo B (agrícola): qué es, quién puede usarlo y cuánto cuesta', descripcion: 'Lo que dice la ley sobre el gasóleo bonificado y su precio medio hoy.', revisada: '2026-11-16' },
+  { slug: 'glp-autogas', titulo: 'GLP o autogás: precio, ahorro real y etiqueta ECO', descripcion: 'Cuánto cuesta el autogás, cuántas gasolineras lo venden y cómo calcular si te compensa.', revisada: '2026-11-16' },
+  { slug: 'calcular-consumo-real', titulo: 'Cómo calcular el consumo real de tu coche', descripcion: 'El método del depósito lleno paso a paso, con calculadora.', revisada: '2026-11-16' },
+  { slug: 'trucos-ahorrar-carburante', titulo: 'Cómo gastar menos en carburante: lo que de verdad funciona', descripcion: 'Elegir gasolinera, conducción eficiente y mantenimiento, con cifras de fuentes oficiales.', revisada: '2026-11-16' },
+];

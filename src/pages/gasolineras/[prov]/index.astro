@@ -1,0 +1,69 @@
+---
+import Base from '../../../layouts/Base.astro';
+import Migas from '../../../components/Migas.astro';
+import Fuente from '../../../components/Fuente.astro';
+import Grafico from '../../../components/Grafico.astro';
+import TablaEstaciones from '../../../components/TablaEstaciones.astro';
+import Calculadora from '../../../components/Calculadora.astro';
+import Anuncio from '../../../components/Anuncio.astro';
+import { provincias, ccaaPorId, municipios, nacional, serieProvincia, serieNacional, variacion, eur, pct, comparar,
+  tendencia, fechaLarga, FECHA, NOMBRE } from '../../../lib/datos.mjs';
+
+export function getStaticPaths() {
+  return provincias.map((p) => ({ params: { prov: p.slug }, props: { id: p.id } }));
+}
+const p = provincias.find((x) => x.id === Astro.props.id)!;
+const c = ccaaPorId[p.ccaa];
+const s = p.stats;
+const muns = municipios.filter((m) => m.prov === p.id).sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+const ranking = (f) => {
+  const r = provincias.filter((x) => x.stats[f]).sort((a, b) => a.stats[f].media - b.stats[f].media);
+  return [r.findIndex((x) => x.id === p.id) + 1, r.length];
+};
+const [rGa, totGa] = ranking('ga');
+const masBaratos = muns.filter((m) => m.stats.ga && m.est.length >= 2).sort((a, b) => a.stats.ga.media - b.stats.ga.media).slice(0, 5);
+const tend = tendencia(serieProvincia(p.id, 'ga'));
+const v1a = variacion(serieProvincia(p.id, 'ga'), 365);
+const title = `Precio de la gasolina y el diésel en ${p.nombre} hoy`;
+const description = `Gasolineras más baratas de ${p.nombre}: diésel a ${eur(s.ga?.media)}/l y gasolina 95 a ${eur(s.g95?.media)}/l de media en ${p.est.length} estaciones. Ranking por municipios e histórico.`;
+---
+<Base title={title} description={description}>
+  <Migas items={[[c.nombre, c.url], [p.nombre, p.url]]} />
+  <h1>Precio de la gasolina y el diésel en {p.nombre}</h1>
+  <p class="resumen">
+    El {fechaLarga(FECHA)} hay <strong>{p.est.length} gasolineras</strong> con precio en la provincia de {p.nombre}, repartidas en {muns.length} municipios.
+    {s.ga && <>El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong>, {comparar(s.ga.media, nacional.stats.ga.media, 'España')}, y {p.nombre} es la provincia n.º {rGa} de {totGa} en precio del diésel (1 = la más barata). </>}
+    {s.g95 && <>La gasolina 95 se paga a <strong>{eur(s.g95.media)}/l</strong>, {comparar(s.g95.media, nacional.stats.g95.media, 'España')}. </>}
+    {tend && `El diésel en ${p.nombre} ${tend}${v1a != null ? `, y respecto a hace un año la variación es del ${pct(v1a)}` : ''}.`}
+  </p>
+  <div class="cifras">
+    {['g95', 'ga', 'g98', 'glp'].filter((f) => s[f]).map((f) => {
+      const v = variacion(serieProvincia(p.id, f), 30);
+      return <div class="cifra"><small>{NOMBRE[f]} · media</small><strong>{eur(s[f].media)}</strong><br /><em>mín. {eur(s[f].min)}</em>{v != null && <em class={v > 0 ? 'sube' : 'baja'}> · 30 días {pct(v)}</em>}</div>;
+    })}
+  </div>
+
+  <h2>Las 20 gasolineras más baratas de {p.nombre}</h2>
+  <TablaEstaciones est={p.est} conMunicipio max={20} />
+  {masBaratos.length > 0 && <p>Municipios con el diésel más barato (2 o más gasolineras): {masBaratos.map((m, i) => <>{i > 0 && ', '}{m.publicada ? <a href={m.url}>{m.nombre}</a> : m.nombre} ({eur(m.stats.ga.media)})</>)}.</p>}
+  <Anuncio />
+
+  <h2>Evolución del precio en {p.nombre}</h2>
+  <Grafico titulo={`Gasóleo A en ${p.nombre} frente a la media de España`} series={[{ nombre: p.nombre, puntos: serieProvincia(p.id, 'ga') }, { nombre: 'España', puntos: serieNacional('ga') }]} />
+  <Grafico titulo={`Gasolina 95 en ${p.nombre} frente a la media de España`} series={[{ nombre: p.nombre, puntos: serieProvincia(p.id, 'g95') }, { nombre: 'España', puntos: serieNacional('g95') }]} />
+  <p><small>Puntos mensuales para los meses antiguos y diarios para los últimos 90 días.</small></p>
+
+  <Calculadora stats={s} zona={p.nombre} />
+
+  <h2>Precio medio por municipio en {p.nombre}</h2>
+  <div class="tabla"><table>
+    <thead><tr><th>Municipio</th><th class="n">Gasolineras</th><th class="n">Gasolina 95</th><th class="n">Gasóleo A</th></tr></thead>
+    <tbody>{muns.map((m) => (
+      <tr><td>{m.publicada ? <a href={m.url}>{m.nombre}</a> : m.nombre}</td><td class="n">{m.est.length}</td>
+        <td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{eur(m.stats.ga?.media)}</td></tr>))}
+    </tbody>
+  </table></div>
+  <Anuncio />
+  <p>Más en <a href={c.url}>{c.nombre}</a> · <a href="/gasolineras/">todas las provincias</a> · <a href="/buscador/">buscar gasolineras cerca de mí</a></p>
+  <Fuente />
+</Base>

@@ -1,0 +1,52 @@
+---
+import Base from '../../layouts/Base.astro';
+import Migas from '../../components/Migas.astro';
+import Fuente from '../../components/Fuente.astro';
+import Grafico from '../../components/Grafico.astro';
+import TablaEstaciones from '../../components/TablaEstaciones.astro';
+import Anuncio from '../../components/Anuncio.astro';
+import { comunidades, nacional, serieCCAA, serieNacional, variacion, eur, pct, comparar, tendencia, fechaLarga, FECHA, NOMBRE } from '../../lib/datos.mjs';
+
+export function getStaticPaths() {
+  return comunidades.map((c) => ({ params: { ccaa: c.slug }, props: { id: c.id } }));
+}
+const c = comunidades.find((x) => x.id === Astro.props.id)!;
+const s = c.stats;
+const provs = [...c.provs].sort((a, b) => (a.stats.ga?.media ?? 9) - (b.stats.ga?.media ?? 9));
+const orden = [...c.est].sort((a, b) => (a.ga ?? 9) - (b.ga ?? 9));
+const tend = tendencia(serieCCAA(c.id, 'ga'));
+const title = `Precio de la gasolina y el diésel en ${c.nombre} hoy`;
+const description = `Precio medio hoy en ${c.nombre}: diésel ${eur(s.ga?.media)}/l y gasolina 95 ${eur(s.g95?.media)}/l en ${c.est.length} gasolineras. Comparativa por provincias e histórico.`;
+---
+<Base title={title} description={description}>
+  <Migas items={[[c.nombre, c.url]]} />
+  <h1>Precio de los carburantes en {c.nombre}</h1>
+  <p class="resumen">
+    {c.nombre} tiene hoy, {fechaLarga(FECHA)}, <strong>{c.est.length} gasolineras</strong> con precio publicado.
+    {s.ga && <>El gasóleo A cuesta de media <strong>{eur(s.ga.media)}/l</strong>, {comparar(s.ga.media, nacional.stats.ga.media, 'España')}. </>}
+    {s.g95 && <>La gasolina 95 está a <strong>{eur(s.g95.media)}/l</strong>, {comparar(s.g95.media, nacional.stats.g95.media, 'España')}. </>}
+    {tend && <>El diésel {tend}.</>}
+  </p>
+  <div class="cifras">
+    {['g95', 'ga', 'g98', 'glp'].filter((f) => s[f]).map((f) => {
+      const v = variacion(serieCCAA(c.id, f), 30);
+      return <div class="cifra"><small>{NOMBRE[f]} · media</small><strong>{eur(s[f].media)}</strong><br /><em>mín. {eur(s[f].min)}</em>{v != null && <em class={v > 0 ? 'sube' : 'baja'}> · 30 días {pct(v)}</em>}</div>;
+    })}
+  </div>
+  {provs.length > 1 && <>
+    <h2>Comparativa por provincias</h2>
+    <div class="tabla"><table>
+      <thead><tr><th>Provincia</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th><th class="n">Gasolina 98</th><th class="n">Gasolineras</th></tr></thead>
+      <tbody>{provs.map((p) => <tr><td><a href={p.url}>{p.nombre}</a></td><td class="n">{eur(p.stats.ga?.media)}</td><td class="n">{eur(p.stats.g95?.media)}</td><td class="n">{eur(p.stats.g98?.media)}</td><td class="n">{p.est.length}</td></tr>)}</tbody>
+    </table></div>
+  </>}
+  {provs.length === 1 && <p><a href={provs[0].url}>Ver precios por municipio en {provs[0].nombre} →</a></p>}
+  <h2>Las 15 gasolineras con el diésel más barato de {c.nombre}</h2>
+  <TablaEstaciones est={orden} conMunicipio max={15} />
+  <Anuncio />
+  <h2>Evolución del precio en {c.nombre}</h2>
+  <Grafico titulo={`Gasóleo A en ${c.nombre} frente a España`} series={[{ nombre: c.nombre, puntos: serieCCAA(c.id, 'ga') }, { nombre: 'España', puntos: serieNacional('ga') }]} />
+  <Grafico titulo={`Gasolina 95 en ${c.nombre} frente a España`} series={[{ nombre: c.nombre, puntos: serieCCAA(c.id, 'g95') }, { nombre: 'España', puntos: serieNacional('g95') }]} />
+  <Anuncio />
+  <Fuente />
+</Base>

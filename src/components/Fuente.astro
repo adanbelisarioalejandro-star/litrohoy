@@ -1,0 +1,10 @@
+---
+import { FUENTE, FUENTE_URL, FECHA, ACTUALIZADO, fechaLarga } from '../lib/datos.mjs';
+const hora = ACTUALIZADO.split(' ')[1]?.slice(0, 5);
+---
+<p class="fuente">
+  <strong>Fuente:</strong> <a href={FUENTE_URL} rel="nofollow noopener" target="_blank">{FUENTE}</a>.
+  Datos actualizados el <time datetime={FECHA}>{fechaLarga(FECHA)}</time>{hora && ` (${hora} h)`}.
+  Precios por litro con impuestos, tal como los comunica cada estación; pueden cambiar a lo largo del día.
+  <a href="/metodologia/">Cómo calculamos las medias</a>.
+</p>

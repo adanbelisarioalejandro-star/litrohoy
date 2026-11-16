@@ -1,0 +1,23 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Fuente from '../components/Fuente.astro';
+import Anuncio from '../components/Anuncio.astro';
+import { marcas, nacional, eur, MIN_ESTACIONES_MARCA } from '../lib/datos.mjs';
+const orden = [...marcas].filter((m) => m.stats.ga).sort((a, b) => a.stats.ga.media - b.stats.ga.media);
+const n = nacional.stats.ga.media;
+const dif = orden.at(-1).stats.ga.media - orden[0].stats.ga.media;
+---
+<Base title="Qué marca de gasolinera es más barata: ranking de precios hoy" description={`Ranking de ${orden.length} marcas de gasolineras por precio medio del diésel y la gasolina 95 hoy. La más barata: ${orden[0].nombre} (${eur(orden[0].stats.ga.media)}/l de diésel).`}>
+  <Migas items={[['Marcas', '/marcas/']]} />
+  <h1>Ranking de marcas de gasolineras por precio</h1>
+  <p class="resumen">Entre las marcas con {MIN_ESTACIONES_MARCA} o más estaciones, la que tiene hoy el diésel más barato de media es <a href={orden[0].url}>{orden[0].nombre}</a> ({eur(orden[0].stats.ga.media)}/l) y la más cara, <a href={orden.at(-1).url}>{orden.at(-1).nombre}</a> ({eur(orden.at(-1).stats.ga.media)}/l): una diferencia de {eur(dif)} por litro, o {eur(dif * 50, 2)} en un depósito de 50 litros. Ten en cuenta que la media de cada marca también depende de en qué provincias está.</p>
+  <div class="tabla"><table>
+    <thead><tr><th class="n">#</th><th>Marca</th><th class="n">Gasóleo A</th><th class="n">vs. media</th><th class="n">Gasolina 95</th><th class="n">Estaciones</th></tr></thead>
+    <tbody>{orden.map((m, i) => { const d = ((m.stats.ga.media - n) / n) * 100; return (
+      <tr><td class="n">{i + 1}</td><td><a href={m.url}>{m.nombre}</a></td><td class="n">{eur(m.stats.ga.media)}</td><td class:list={['n', d > 0 ? 'sube' : 'baja']}>{(d > 0 ? '+' : '') + d.toFixed(1).replace('.', ',')} %</td><td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{m.est.length}</td></tr>); })}</tbody>
+  </table></div>
+  <Anuncio />
+  <p>¿Merece la pena ir a una low cost? Lo analizamos en la guía <a href="/guias/gasolineras-low-cost-vs-marcas/">low cost frente a marcas tradicionales</a>.</p>
+  <Fuente />
+</Base>

@@ -1,0 +1,35 @@
+---
+// Gráfico de líneas en SVG generado en el build (sin JS). series: [{ nombre, puntos: [[AAAA-MM-DD, valor]] }]
+interface Serie { nombre: string; puntos: [string, number][] }
+interface Props { series: Serie[]; titulo: string }
+const { series: todas, titulo } = Astro.props;
+const series = todas.filter((s) => s.puntos.length > 1);
+const COLORES = ['#0b6e4f', '#c2410c', '#2563eb', '#7c3aed'];
+const W = 640, H = 260, L = 52, R = 12, T = 12, B = 30;
+const t = (d: string) => new Date(d + 'T00:00:00Z').getTime();
+const xs = series.flatMap((s) => s.puntos.map((p) => t(p[0])));
+const ys = series.flatMap((s) => s.puntos.map((p) => p[1]));
+const x0 = Math.min(...xs), x1 = Math.max(...xs);
+let y0 = Math.min(...ys), y1 = Math.max(...ys);
+const pad = Math.max((y1 - y0) * 0.08, 0.01); y0 -= pad; y1 += pad;
+const X = (v: number) => L + ((v - x0) / (x1 - x0 || 1)) * (W - L - R);
+const Y = (v: number) => T + (1 - (v - y0) / (y1 - y0 || 1)) * (H - T - B);
+const ticksY = [0, 1, 2, 3, 4].map((i) => y0 + ((y1 - y0) * i) / 4);
+const largo = (x1 - x0) / 864e5 > 150;
+const fmt = (ms: number) => new Date(ms).toLocaleDateString('es-ES', largo ? { month: 'short', year: 'numeric', timeZone: 'UTC' } : { day: 'numeric', month: 'short', timeZone: 'UTC' });
+const ticksX = [0, 0.25, 0.5, 0.75, 1].map((f) => x0 + (x1 - x0) * f);
+const path = (s: Serie) => s.puntos.map((p, i) => `${i ? 'L' : 'M'}${X(t(p[0])).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('');
+const resumen = series.map((s) => `${s.nombre}: de ${s.puntos[0][1].toFixed(3)} € a ${s.puntos.at(-1)![1].toFixed(3)} €`).join('; ');
+---
+{series.length > 0 && (
+  <figure>
+    <svg class="graf" viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${titulo}. ${resumen}`}>
+      {ticksY.map((v) => (<g><line x1={L} x2={W - R} y1={Y(v)} y2={Y(v)} stroke="#e5e9e7" /><text x={L - 6} y={Y(v) + 4} text-anchor="end" font-size="11" fill="#5b6670">{v.toFixed(3).replace('.', ',')}</text></g>))}
+      {ticksX.map((v, i) => (<text x={X(v)} y={H - 8} text-anchor={i === 0 ? 'start' : i === 4 ? 'end' : 'middle'} font-size="11" fill="#5b6670">{fmt(v)}</text>))}
+      {series.map((s, i) => (<path d={path(s)} fill="none" stroke={COLORES[i % 4]} stroke-width="2.2" stroke-linejoin="round" />))}
+    </svg>
+    <figcaption>
+      {titulo} (€/litro). {series.map((s, i) => (<span style="white-space:nowrap;margin-right:.8rem"><span style={`display:inline-block;width:.8rem;height:.25rem;vertical-align:middle;background:${COLORES[i % 4]}`}></span> {s.nombre}</span>))}
+    </figcaption>
+  </figure>
+)}

@@ -1,0 +1,60 @@
+---
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Fuente from '../components/Fuente.astro';
+import Anuncio from '../components/Anuncio.astro';
+import { provincias } from '../lib/datos.mjs';
+const lista = [...provincias].sort((a, b) => a.nombre.localeCompare(b.nombre, 'es'));
+---
+<Base title="Buscador de gasolineras baratas cerca de mí" description="Encuentra las gasolineras más baratas cerca de tu ubicación o en tu provincia, ordenadas por precio de diésel, gasolina 95, 98 o GLP. Datos oficiales de hoy.">
+  <Migas items={[['Buscador', '/buscador/']]} />
+  <h1>Gasolineras más baratas cerca de ti</h1>
+  <p>Usa tu ubicación (no se guarda ni se envía a ningún servidor: el cálculo se hace en tu navegador) o elige una provincia. Ordenamos las gasolineras por el precio del carburante que elijas.</p>
+  <section class="herramienta" id="buscador">
+    <label>Carburante <select name="f"><option value="6">Gasóleo A (diésel)</option><option value="5">Gasolina 95</option><option value="7">Gasolina 98</option><option value="8">GLP / autogás</option></select></label>
+    <label>Distancia máxima (con ubicación) <select name="r"><option value="5">5 km</option><option value="10" selected>10 km</option><option value="25">25 km</option><option value="50">50 km</option></select></label>
+    <p><button type="button" name="geo">📍 Usar mi ubicación</button></p>
+    <label>…o elige provincia <select name="p"><option value="">— Provincia —</option>{lista.map((p) => <option value={p.id}>{p.nombre}</option>)}</select></label>
+    <output aria-live="polite"></output>
+  </section>
+  <div id="res"></div>
+  <noscript><p>El buscador necesita JavaScript. También puedes consultar las <a href="/gasolineras/">páginas por provincia</a>.</p></noscript>
+  <Anuncio />
+  <Fuente />
+  <script is:inline>
+  (() => {
+    const s = document.getElementById('buscador'), q = (n) => s.querySelector(`[name=${n}]`), out = s.querySelector('output'), res = document.getElementById('res');
+    const cache = {}, carga = (id) => (cache[id] ??= fetch(`/datos/${id}.json`).then((r) => r.json()));
+    let provs, ultimo = null;
+    const km = (a, b, c, d) => { const R = 6371, r = Math.PI / 180, x = Math.sin((c - a) * r / 2) ** 2 + Math.cos(a * r) * Math.cos(c * r) * Math.sin((d - b) * r / 2) ** 2; return 2 * R * Math.asin(Math.sqrt(x)); };
+    const eur = (x) => x.toFixed(3).replace('.', ',') + ' €';
+    const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    function pinta(lista, conDist) {
+      const f = +q('f').value;
+      const filas = lista.filter((e) => e[f]).sort((a, b) => a[f] - b[f]).slice(0, 30);
+      if (!filas.length) { res.innerHTML = '<p>No hay gasolineras con ese carburante en la zona elegida. Prueba con más distancia u otro carburante.</p>'; return; }
+      res.innerHTML = `<div class="tabla"><table><thead><tr><th>Gasolinera</th><th class="n">Precio</th>${conDist ? '<th class="n">Distancia</th>' : ''}<th>Cómo llegar</th></tr></thead><tbody>` +
+        filas.map((e, i) => `<tr><td><strong>${esc(e[0])}</strong><br><small>${esc(e[1])} · ${e[9] ? `<a href="${e[9]}">${esc(e[2])}</a>` : esc(e[2])}</small></td><td class="n${i ? '' : ' top1'}">${eur(e[f])}</td>${conDist ? `<td class="n">${e.d.toFixed(1).replace('.', ',')} km</td>` : ''}<td><a rel="nofollow noopener" target="_blank" href="https://www.google.com/maps/dir/?api=1&destination=${e[3]},${e[4]}">Mapa</a></td></tr>`).join('') + '</tbody></table></div>';
+    }
+    async function porProvincia(id) { ultimo = { id }; out.textContent = 'Cargando…'; pinta(await carga(id), false); out.textContent = ''; }
+    async function porUbicacion(lat, lon) {
+      ultimo = { lat, lon }; out.textContent = 'Buscando gasolineras cercanas…';
+      provs ??= await fetch('/datos/provincias.json').then((r) => r.json());
+      const cerca = provs.map((p) => [p, km(lat, lon, p[1], p[2])]).sort((a, b) => a[1] - b[1]).slice(0, 3);
+      const todas = (await Promise.all(cerca.map(([p]) => carga(p[0])))).flat();
+      const r = +q('r').value;
+      pinta(todas.map((e) => Object.assign(e, { d: km(lat, lon, e[3], e[4]) })).filter((e) => e.d <= r), true);
+      out.textContent = '';
+    }
+    q('geo').addEventListener('click', () => {
+      if (!navigator.geolocation) { out.textContent = 'Tu navegador no permite la geolocalización. Elige una provincia.'; return; }
+      out.textContent = 'Pidiendo permiso de ubicación…';
+      navigator.geolocation.getCurrentPosition((p) => porUbicacion(p.coords.latitude, p.coords.longitude),
+        () => { out.textContent = 'No se ha podido obtener tu ubicación. Elige una provincia.'; }, { timeout: 10000, maximumAge: 600000 });
+    });
+    q('p').addEventListener('change', () => q('p').value && porProvincia(q('p').value));
+    const rehacer = () => ultimo && (ultimo.id ? porProvincia(ultimo.id) : porUbicacion(ultimo.lat, ultimo.lon));
+    q('f').addEventListener('change', rehacer); q('r').addEventListener('change', rehacer);
+  })();
+  </script>
+</Base>

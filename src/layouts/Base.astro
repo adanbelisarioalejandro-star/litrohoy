@@ -1,0 +1,80 @@
+---
+interface Props { title: string; description: string; path?: string; jsonld?: object[]; noindex?: boolean }
+const { title, description, path = Astro.url.pathname, jsonld = [], noindex = false } = Astro.props;
+const SITIO = 'LitroHoy';
+const site = Astro.site!.href.replace(/\/$/, '');
+const canonical = site + path;
+const adsId = import.meta.env.PUBLIC_ADSENSE_ID; // ca-pub-XXXXXXXXXXXXXXXX (vacío hasta que AdSense apruebe)
+const ld = [{ '@context': 'https://schema.org', '@type': 'WebSite', name: SITIO, url: site + '/', inLanguage: 'es-ES' }, ...jsonld];
+const nav = [['/', 'Inicio'], ['/buscador/', 'Buscador'], ['/gasolineras/', 'Provincias'], ['/marcas/', 'Marcas'], ['/guias/', 'Guías']];
+---
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="canonical" href={canonical} />
+  {noindex && <meta name="robots" content="noindex, follow" />}
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="es_ES" />
+  <meta property="og:site_name" content={SITIO} />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:url" content={canonical} />
+  <meta name="theme-color" content="#0b6e4f" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  {adsId && <script async src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsId}`} crossorigin="anonymous"></script>}
+  <script type="application/ld+json" set:html={JSON.stringify(ld.length === 1 ? ld[0] : ld)} />
+  <style is:global>
+    :root { --tinta:#1b1f23; --suave:#5b6670; --fondo:#fff; --caja:#f4f6f5; --borde:#dde3e0; --marca:#0b6e4f; --marca2:#c2410c; --azul:#2563eb; --ok:#0b6e4f; --mal:#b91c1c; }
+    *{box-sizing:border-box} html{-webkit-text-size-adjust:100%}
+    body{margin:0;font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--tinta);background:var(--fondo)}
+    a{color:var(--marca)} a:hover{color:var(--marca2)}
+    .env{max-width:68rem;margin:0 auto;padding:0 16px}
+    header.top{border-bottom:1px solid var(--borde);background:#fff}
+    header.top .env{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem 1rem;padding-block:.6rem}
+    .logo{font-weight:800;font-size:1.2rem;text-decoration:none;color:var(--tinta)} .logo b{color:var(--marca)}
+    nav.principal{display:flex;flex-wrap:wrap;gap:.1rem .9rem;font-size:.95rem} nav.principal a{text-decoration:none;color:var(--suave)} nav.principal a:hover{color:var(--marca)}
+    main{padding-block:1rem 2rem} h1{font-size:1.6rem;line-height:1.25;margin:.6rem 0} h2{font-size:1.25rem;margin:2rem 0 .6rem} h3{font-size:1.05rem}
+    .migas{font-size:.85rem;color:var(--suave)} .migas ol{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:.3rem} .migas li+li::before{content:"›";margin-right:.3rem}
+    .resumen{font-size:1.05rem} .cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem;margin:1rem 0}
+    .cifra{background:var(--caja);border:1px solid var(--borde);border-radius:.6rem;padding:.6rem .8rem} .cifra small{display:block;color:var(--suave);font-size:.8rem} .cifra strong{font-size:1.35rem} .cifra em{font-style:normal;font-size:.8rem}
+    .sube{color:var(--mal)} .baja{color:var(--ok)}
+    .tabla{overflow-x:auto;border:1px solid var(--borde);border-radius:.6rem} table{border-collapse:collapse;width:100%;font-size:.92rem}
+    th,td{padding:.45rem .6rem;text-align:left;border-bottom:1px solid var(--borde);vertical-align:top} th{background:var(--caja);font-weight:600;white-space:nowrap}
+    td.n,th.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums} td small{color:var(--suave)} td:first-child{min-width:10.5rem} details.mas{margin-top:.6rem} details.mas summary{cursor:pointer;color:var(--marca);font-weight:600;padding:.4rem 0} .top1{background:#e7f6ee;font-weight:700}
+    .fuente{font-size:.85rem;color:var(--suave);border-left:3px solid var(--borde);padding-left:.7rem;margin:1.5rem 0}
+    .ad{margin:1.5rem 0;text-align:center} .ad>span{display:block;font-size:.7rem;color:var(--suave);text-transform:uppercase;letter-spacing:.05em}
+    .herramienta{background:var(--caja);border:1px solid var(--borde);border-radius:.8rem;padding:1rem;margin:1rem 0}
+    .herramienta label{display:block;font-size:.9rem;margin:.4rem 0 .15rem} .herramienta input,.herramienta select,.herramienta button{font:inherit;padding:.45rem .6rem;border:1px solid #b8c2bd;border-radius:.4rem;width:100%;max-width:22rem;background:#fff}
+    .herramienta button{background:var(--marca);color:#fff;border:0;cursor:pointer;width:auto} .herramienta output{display:block;font-size:1.1rem;margin-top:.7rem}
+    .rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(14rem,1fr));gap:.3rem 1rem;padding:0;list-style:none}
+    figure{margin:1rem 0} figcaption{font-size:.85rem;color:var(--suave)} svg.graf{width:100%;height:auto;display:block}
+    article.guia{max-width:44rem} article.guia p,article.guia li{font-size:1.03rem}
+    footer.pie{border-top:1px solid var(--borde);background:var(--caja);font-size:.88rem;color:var(--suave);padding-block:1.2rem}
+    footer.pie nav{display:flex;flex-wrap:wrap;gap:.3rem 1rem;margin-bottom:.6rem} footer.pie button{font:inherit;background:none;border:0;padding:0;color:var(--marca);text-decoration:underline;cursor:pointer}
+    @media (min-width:48rem){h1{font-size:2rem}}
+  </style>
+</head>
+<body>
+  <header class="top"><div class="env">
+    <a class="logo" href="/">Litro<b>Hoy</b></a>
+    <nav class="principal" aria-label="Principal">{nav.map(([h, t]) => <a href={h}>{t}</a>)}</nav>
+  </div></header>
+  <main class="env"><slot /></main>
+  <footer class="pie"><div class="env">
+    <nav aria-label="Legal">
+      <a href="/sobre/">Sobre LitroHoy</a><a href="/metodologia/">Metodología</a><a href="/contacto/">Contacto</a>
+      <a href="/aviso-legal/">Aviso legal</a><a href="/privacidad/">Privacidad</a><a href="/cookies/">Cookies</a>
+      {adsId && <button id="revocar" type="button" hidden onclick="window.googlefc&&googlefc.showRevocationMessage()">Configurar privacidad</button>}
+    </nav>
+    <p>Precios oficiales de carburantes comunicados por las estaciones de servicio al Ministerio para la Transición Ecológica y el Reto Demográfico. LitroHoy es un proyecto independiente, sin relación con el Ministerio ni con las marcas citadas.</p>
+  </div></footer>
+  {adsId && <script is:inline>
+    window.googlefc = window.googlefc || {}; googlefc.callbackQueue = googlefc.callbackQueue || [];
+    googlefc.callbackQueue.push({ CONSENT_API_READY: () => { const b = document.getElementById('revocar'); if (b) b.hidden = false; } });
+  </script>}
+</body>
+</html>
