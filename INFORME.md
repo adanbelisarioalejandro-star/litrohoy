@@ -5,7 +5,7 @@ _Generado automáticamente el 2026-11-16. Datos de precios del 2026-11-16 (11528
 ## Páginas
 | Concepto | Valor |
 |---|---|
-| Páginas revisadas por el control de calidad | 376 |
+| Páginas revisadas por el control de calidad | 389 |
 | Páginas con fallos de calidad | 0 |
 | Municipios publicados | 265 |
 | Municipios nuevos esta semana | 265 |
@@ -28,6 +28,7 @@ AdSense aún no conectado (ver PENDIENTE.md).
 ## Evolución semanal
 | Semana | Clics | Impresiones | Ingresos |
 |---|---|---|---|
+| 2026-11-16 | 0 | 0 | — |
 | 2026-11-16 | 0 | 0 | — |
 | 2026-11-16 | 0 | 0 | — |
 | 2026-11-16 | 0 | 0 | — |
