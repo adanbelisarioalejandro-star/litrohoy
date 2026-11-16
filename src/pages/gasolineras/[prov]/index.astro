@@ -28,7 +28,7 @@ const title = `Precio de la gasolina y el diésel en ${p.nombre} hoy`;
 const description = `Gasolineras más baratas de ${p.nombre}: diésel a ${eur(s.ga?.media)}/l y gasolina 95 a ${eur(s.g95?.media)}/l de media en ${p.est.length} estaciones. Ranking por municipios e histórico.`;
 ---
 <Base title={title} description={description}>
-  <Migas items={[[c.nombre, c.url], [p.nombre, p.url]]} />
+  <Migas items={[...(c.uni ? [] : [[c.nombre, c.url]]), [p.nombre, p.url]]} />
   <h1>Precio de la gasolina y el diésel en {p.nombre}</h1>
   <p class="resumen">
     El {fechaLarga(FECHA)} hay <strong>{p.est.length} gasolineras</strong> con precio en la provincia de {p.nombre}, repartidas en {muns.length} municipios.
@@ -64,6 +64,6 @@ const description = `Gasolineras más baratas de ${p.nombre}: diésel a ${eur(s.
     </tbody>
   </table></div>
   <Anuncio />
-  <p>Más en <a href={c.url}>{c.nombre}</a> · <a href="/gasolineras/">todas las provincias</a> · <a href="/buscador/">buscar gasolineras cerca de mí</a></p>
+  <p>{!c.uni && <>Más en <a href={c.url}>{c.nombre}</a> · </>}<a href="/gasolineras/">todas las provincias</a> · <a href="/buscador/">buscar gasolineras cerca de mí</a></p>
   <Fuente />
 </Base>

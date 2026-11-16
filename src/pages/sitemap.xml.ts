@@ -6,7 +6,7 @@ export function GET({ site }: { site: URL }) {
   const urls: [string, string][] = [
     ...['/', '/buscador/', '/gasolineras/', '/marcas/'].map((u) => [u, FECHA] as [string, string]),
     ...provincias.map((p) => [p.url, FECHA] as [string, string]),
-    ...comunidades.map((c) => [c.url, FECHA] as [string, string]),
+    ...comunidades.filter((c) => !c.uni).map((c) => [c.url, FECHA] as [string, string]),
     ...marcas.map((m) => [m.url, FECHA] as [string, string]),
     ...municipiosPublicados.filter((m) => !m.retirada).map((m) => [m.url, FECHA] as [string, string]),
     ['/guias/', GUIAS.map((g) => g.revisada).sort().at(-1)!],

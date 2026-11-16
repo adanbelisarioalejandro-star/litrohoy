@@ -40,7 +40,7 @@ const jsonld = [{
 }];
 ---
 <Base title={title} description={description} jsonld={jsonld} noindex={m.retirada}>
-  <Migas items={[[c.nombre, c.url], [p.nombre, p.url], [m.nombre, m.url]]} />
+  <Migas items={[...(c.uni ? [] : [[c.nombre, c.url]]), [p.nombre, p.url], [m.nombre, m.url]]} />
   <h1>Gasolineras en {m.nombre}: precio de la gasolina y el diésel hoy</h1>
   <p class="resumen">
     {`Hoy, ${fechaLarga(FECHA)}, hay `}<strong>{n} gasolineras</strong>{` con precios publicados en ${m.nombre}${m.nombre !== p.nombre ? ` (${p.nombre})` : ''}.`}{m.est.length - n === 1 && ' Otra no publica precio de gasolina, diésel ni GLP.'}{m.est.length - n > 1 && ` Otras ${m.est.length - n} no publican precio de gasolina, diésel ni GLP.`}

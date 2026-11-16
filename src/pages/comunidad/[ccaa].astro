@@ -8,7 +8,7 @@ import Anuncio from '../../components/Anuncio.astro';
 import { comunidades, nacional, serieCCAA, serieNacional, variacion, eur, pct, comparar, tendencia, fechaLarga, FECHA, NOMBRE } from '../../lib/datos.mjs';
 
 export function getStaticPaths() {
-  return comunidades.map((c) => ({ params: { ccaa: c.slug }, props: { id: c.id } }));
+  return comunidades.filter((c) => !c.uni).map((c) => ({ params: { ccaa: c.slug }, props: { id: c.id } }));
 }
 const c = comunidades.find((x) => x.id === Astro.props.id)!;
 const s = c.stats;

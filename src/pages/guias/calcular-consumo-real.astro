@@ -29,6 +29,9 @@ const p = nacional.stats.ga.media.toFixed(3);
         o.innerHTML = `Consumo real: <strong>${c.toFixed(2).replace('.', ',')} l/100 km</strong>` + (p > 0 ? ` · Coste: <strong>${(c * p).toFixed(2).replace('.', ',')} € cada 100 km</strong> (${(c * p / 100 * 100).toFixed(1).replace('.', ',')} céntimos por km)` : ''); };
       s.addEventListener('input', f); f(); })();
   </script>
+  <h2>Por qué no coincide con el dato oficial ni con el ordenador de a bordo</h2>
+  <p>El consumo homologado de los coches nuevos se mide en un ciclo de laboratorio estandarizado (en la Unión Europea, el procedimiento WLTP), con una temperatura, una carga y un recorrido fijos. En la vida real influyen el tráfico, el clima, el aire acondicionado, la carga del coche y tu forma de conducir, así que lo normal es gastar algo más.</p>
+  <p>El ordenador de a bordo calcula el consumo a partir de la inyección del motor y suele ser optimista: en muchos coches marca unas décimas menos que el método del depósito. Úsalo para ver tendencias (si un trayecto gasta más que otro), pero calcula el gasto real con los litros que pagas.</p>
   <h2>Consejos para que la medida sea fiable</h2>
   <ul>
     <li>Repite la medición varias veces y haz la media: un solo depósito puede salir alto por un atasco o bajo por un viaje largo por autovía.</li>

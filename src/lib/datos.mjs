@@ -35,7 +35,14 @@ export const titulo = (s) => s.toLowerCase().replace(/[\p{L}\d.ºª]+/gu, (w, i)
 const ABREV = { 'C/': 'Calle', CR: 'Ctra.', CTRA: 'Ctra.', 'CTRA.': 'Ctra.', CL: 'Calle', C: 'Calle', AV: 'Avda.', AVDA: 'Avda.', 'AVDA.': 'Avda.', PZ: 'Plaza', PZA: 'Plaza', PG: 'Pol.', POL: 'Pol.', 'POL.': 'Pol.', PS: 'Paseo', AU: 'Autovía', AUT: 'Autovía' };
 const VIA = /^(CALLE|CARRETERA|AVENIDA|PLAZA|PASEO|CAMINO|RONDA|TRAVESIA|TRAVESÍA|AUTOVIA|AUTOVÍA|POLIGONO|POLÍGONO|GLORIETA)$/;
 export function direccion(s) {
-  let w = s.toUpperCase().replace(/\s*,\s*/g, ', ').replace(/(\d), (\d)/g, '$1,$2').replace(/[\s,]+$/, '').replace(/\s+/g, ' ').trim().split(' ');
+  let t0 = s.toUpperCase()
+    .replace(/\b([IVXL]+)KM\b/g, '$1 KM')            // "NACIONAL VKM 19" (errata de la fuente) -> "NACIONAL V KM 19"
+    .replace(/\bP\.?K\.?(?=\s*\d)/g, 'KM')            // punto kilométrico
+    .replace(/(\d)[,.](\d)/g, '$1\u0000$2')           // decimal sin espacios ("369,8", "23.5") -> se protege
+    .replace(/\s*,\s*/g, ', ').replace(/(,\s*)?\bKM\.?\s*$/, '').replace(/[\s,]+$/, '').replace(/\s+/g, ' ').trim();
+  // "CR A-5, 21": en carreteras, un número tras el código de vía sin "KM" es el punto kilométrico
+  if (!/\bKM\b/.test(t0)) t0 = t0.replace(/^((?:CR|CTRA\.?|CARRETERA|AUTOVIA|AUTOVÍA|AU|AUT)\s+[A-Z]{1,3}-[\dIVXL]+[A-Z]?),\s*(\d[\d\u0000]*)(?=,|$)/, '$1, KM $2');
+  let w = t0.split(' ').map((x) => x.replace(/\u0000/g, ','));
   if (ABREV[w[0]]) w[0] = ABREV[w[0]];
   // "CALLE CALLE DE ..." / "CALLE AVENIDA ..." -> se queda el segundo tipo de vía
   if (w.length > 2 && (VIA.test(w[0]) || /^(Calle|Ctra\.|Avda\.|Plaza|Paseo)$/.test(w[0])) && VIA.test(w[1].replace(',', ''))) w = w.slice(1);
@@ -44,6 +51,7 @@ export function direccion(s) {
     const coma = t.endsWith(',') ? ',' : '';
     if (/^[A-Z]{1,3}-?\d+[A-Z]?$/.test(limpio) && /\d/.test(limpio) && limpio.includes('-')) return limpio + coma; // A-5, CM-332
     if (/^[A-Z]{1,3}-[IVXL]+$/.test(limpio)) return limpio + coma; // N-III
+    if (/^[IVXL]+$/.test(limpio) && w[i - 1] === 'NACIONAL') return limpio + coma; // Nacional VI
     if (limpio === 'S/N' || limpio === 'SN') return 's/n' + coma;
     if (limpio === 'KM' || limpio === 'KM.') return 'km' + coma;
     if (/^\d/.test(limpio) || /^[A-Z][a-z]+\.$/.test(limpio)) return t; // números, abreviaturas ya normalizadas
@@ -153,7 +161,9 @@ export const provPorId = Object.fromEntries(provincias.map((p) => [p.id, p]));
 export const comunidades = Object.entries(CCAA).map(([id, nombre]) => {
   const provs = provincias.filter((p) => p.ccaa === id);
   const est = provs.flatMap((p) => p.est);
-  return { id, nombre, slug: slug(nombre), url: `/comunidad/${slug(nombre)}/`, provs, est, stats: stats(est) };
+  // Comunidades de una sola provincia: sin página propia (sería un duplicado); su URL es la de la provincia
+  const uni = provs.length === 1;
+  return { id, nombre, slug: slug(nombre), url: uni ? provs[0]?.url : `/comunidad/${slug(nombre)}/`, uni, provs, est, stats: stats(est) };
 }).filter((c) => c.est.length);
 export const ccaaPorId = Object.fromEntries(comunidades.map((c) => [c.id, c]));
 // p.ref: cómo nombrar la zona de referencia en los textos ("la provincia de Sevilla" / "la Comunidad de Madrid")
@@ -204,7 +214,7 @@ export const marcas = (() => {
     if (!g.has(k)) g.set(k, []);
     g.get(k).push(e);
   }
-  return [...g].filter(([, est]) => est.length >= MIN_ESTACIONES_MARCA).map(([k, est]) => ({
+  return [...g].filter(([, est]) => est.filter((e) => e.ga || e.g95).length >= MIN_ESTACIONES_MARCA).map(([k, est]) => ({
     clave: k, nombre: nombreMarca(k), slug: slug(k), url: `/marca/${slug(k)}/`, est, stats: stats(est),
     provs: Object.entries(Object.groupBy(est, (e) => e.p)).map(([p, l]) => ({ prov: provPorId[p], est: l, stats: stats(l) }))
       .filter((x) => x.prov).sort((a, b) => b.est.length - a.est.length),
