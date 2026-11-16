@@ -7,3 +7,5 @@ dist/
 data/actual.json
 .playwright-mcp/
 *.log
+aviso.md
+cuerpo.md

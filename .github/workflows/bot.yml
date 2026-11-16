@@ -1,0 +1,123 @@
+# Bot de LitroHoy: actualiza, amplía, vigila, mide, mejora e informa. Sin intervención humana.
+# Diario: datos + build + control de calidad + enlaces + despliegue + comprobación en línea.
+# Lunes (o manual con "semanal"): además mide (solo lectura), mejora, amplía e informa.
+name: bot
+
+on:
+  schedule:
+    - cron: '17 7 * * *' # 07:17 UTC; la fuente publica de madrugada
+  workflow_dispatch:
+    inputs:
+      semanal:
+        description: 'Ejecutar también las tareas semanales'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write   # commit de data/, INFORME.md y SIGUIENTE.md
+  pages: write      # despliegue en GitHub Pages
+  id-token: write   # requerido por deploy-pages
+  issues: write     # abrir avisos si algo falla
+
+concurrency:
+  group: bot
+  cancel-in-progress: false
+
+jobs:
+  bot:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    env:
+      SITE_URL: ${{ vars.SITE_URL }}
+      PUBLIC_ADSENSE_ID: ${{ vars.PUBLIC_ADSENSE_ID }}
+      PUBLIC_ADSENSE_SLOT: ${{ vars.PUBLIC_ADSENSE_SLOT }}
+      AVISO_FILE: ${{ github.workspace }}/aviso.md
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Tests
+        run: npm test
+
+      - name: ¿Toca tarea semanal?
+        id: semana
+        run: |
+          if [ "$(date -u +%u)" = "1" ] || [ "${{ inputs.semanal }}" = "true" ]; then echo "si=true" >> "$GITHUB_OUTPUT"; else echo "si=false" >> "$GITHUB_OUTPUT"; fi
+
+      - name: 1. Actualizar datos oficiales
+        run: node scripts/update.mjs
+
+      - name: 4. Medir (solo lectura)
+        if: steps.semana.outputs.si == 'true'
+        env:
+          GSC_CREDENTIALS: ${{ secrets.GSC_CREDENTIALS }}
+          GSC_SITE: ${{ secrets.GSC_SITE }}
+          ADSENSE_CLIENT_ID: ${{ secrets.ADSENSE_CLIENT_ID }}
+          ADSENSE_CLIENT_SECRET: ${{ secrets.ADSENSE_CLIENT_SECRET }}
+          ADSENSE_REFRESH_TOKEN: ${{ secrets.ADSENSE_REFRESH_TOKEN }}
+        run: node scripts/medir.mjs
+
+      - name: 5. Mejorar
+        if: steps.semana.outputs.si == 'true'
+        run: node scripts/mejorar.mjs
+
+      - name: 2. Ampliar (máx. 40 municipios que pasen el control)
+        if: steps.semana.outputs.si == 'true'
+        run: node scripts/expand.mjs
+
+      - name: Build + control de calidad
+        run: |
+          npx astro build
+          # Si solo fallan municipios, qc los despublica (exit 3) y se reconstruye; cualquier otro fallo bloquea el despliegue
+          node scripts/qc.mjs dist --corregir || { s=$?; [ "$s" -eq 3 ] && npx astro build && node scripts/qc.mjs dist; }
+
+      - name: 3. Vigilar enlaces internos
+        run: node scripts/vigilar.mjs dist
+
+      - name: 6. Informar
+        if: steps.semana.outputs.si == 'true'
+        run: node scripts/informe.mjs
+
+      - name: Guardar datos en el repositorio
+        run: |
+          git config user.name "litrohoy-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data INFORME.md SIGUIENTE.md
+          git diff --cached --quiet || git commit -m "bot: datos del $(date -u +%F)"
+          git push
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Desplegar
+        id: despliegue
+        uses: actions/deploy-pages@v4
+
+      - name: 3. Vigilar que el sitio está en línea
+        run: node scripts/vigilar.mjs --online "${SITE_URL:-${{ steps.despliegue.outputs.page_url }}}"
+
+      - name: Abrir aviso (issue) si algo ha fallado
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          titulo="Bot: fallo en la ejecución del $(date -u +%F)"
+          {
+            echo "La ejecución diaria del bot ha fallado: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+            echo
+            if [ -s aviso.md ]; then cat aviso.md; else echo "No hay diagnóstico automático: abre el enlace y mira el primer paso en rojo."; fi
+            echo
+            echo "El sitio publicado sigue mostrando la última versión correcta (no se despliega nada que no haya pasado el control)."
+          } > cuerpo.md
+          abierto=$(gh issue list --label bot --state open --limit 1 --json number --jq '.[0].number' || true)
+          if [ -n "$abierto" ]; then gh issue comment "$abierto" --body-file cuerpo.md; else gh label create bot --color B60205 2>/dev/null || true; gh issue create --title "$titulo" --label bot --body-file cuerpo.md; fi

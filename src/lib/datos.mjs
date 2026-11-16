@@ -65,6 +65,14 @@ export function direccion(s) {
   return out.join(' ');
 }
 
+/** "Coruña (A)" -> "A Coruña"; "Puerto de Santa María (El)" -> "El Puerto de Santa María"; "Hospitalet de Llobregat (L')" -> "L'Hospitalet de Llobregat" */
+export function nombreMunicipio(n) {
+  const m = n.trim().match(/^(.+?)\s*\(([^)]+)\)$/);
+  if (!m || !/^(el|la|los|las|l'|a|o|os|as|es|sa|ses|els|les|lo)$/i.test(m[2].trim())) return n.trim();
+  const art = m[2].trim();
+  return art.endsWith("'") ? `${art}${m[1]}` : `${art} ${m[1]}`;
+}
+
 /** "la provincia de Sevilla", o el nombre de la comunidad si es uniprovincial ("la Comunidad de Madrid"). */
 export function refZona(p, ccaaNombre, uniprovincial) {
   if (!uniprovincial) return `la provincia de ${p.nombre}`;
@@ -179,7 +187,7 @@ for (const p of provincias) {
   lista.sort((a, b) => b.length - a.length);
   for (const est of lista) {
     const id = est[0].mi;
-    const nombre = est[0].m;
+    const nombre = nombreMunicipio(est[0].m);
     let s = slug(nombre);
     if (usados.has(s)) s = `${s}-${id}`;
     usados.add(s);

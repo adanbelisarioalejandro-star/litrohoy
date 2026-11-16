@@ -36,7 +36,11 @@ if (process.argv[1]?.endsWith('update.mjs')) {
       if (!process.argv[2] && !existsSync(`data/historico/${h.iso}.csv`))
         await actualizar(h.api).then((x) => console.log(`OK histórico ${x.fecha}`), (e) => console.error(`Aviso: sin histórico de ${h.iso}: ${e.message}`));
     })
-    .catch((e) => {
+    .catch(async (e) => {
+      const { aviso } = await import('./lib/aviso.mjs');
+      if (e instanceof FormatoError)
+        aviso('La fuente de datos ha cambiado de formato', e.message, 'Abre la API del Ministerio (ver scripts/lib/fuente.mjs, constante API), compara los campos con OBLIGATORIOS y adapta validar()/compactar(). Mientras tanto el sitio sigue mostrando los datos del último día válido.');
+      else aviso('No se pudieron descargar los datos del Ministerio', e.message, 'Suele ser una caída temporal de la API oficial: si mañana se repite, comprueba que la URL de scripts/lib/fuente.mjs sigue funcionando.');
       console.error(e instanceof FormatoError ? `CAMBIO DE FORMATO EN LA FUENTE: ${e.message}` : `ERROR: ${e.message}`);
       process.exit(e instanceof FormatoError ? 2 : 1);
     });

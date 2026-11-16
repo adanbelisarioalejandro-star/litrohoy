@@ -12,7 +12,7 @@ const DIAS_BLOQUEO = 28;
 export function puntuacionProvincias(metricas, municipios) {
   const acc = {};
   for (const m of municipios) {
-    const imp = metricas?.paginas?.[m.url]?.impresiones;
+    const imp = metricas?.gsc?.[m.url]?.impresiones;
     if (imp == null) continue;
     const a = (acc[m.prov] ??= [0, 0]);
     a[0] += imp; a[1]++;

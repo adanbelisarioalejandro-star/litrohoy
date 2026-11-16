@@ -1,0 +1,17 @@
+{
+ "fecha": "2026-11-16",
+ "gsc": null,
+ "adsense": null,
+ "errores": [
+  "Search Console no conectado (faltan GSC_CREDENTIALS/GSC_SITE)",
+  "AdSense no conectado (falta ADSENSE_REFRESH_TOKEN)"
+ ],
+ "historico": [
+  {
+   "fecha": "2026-11-16",
+   "clics": 0,
+   "impresiones": 0,
+   "ingresos": null
+  }
+ ]
+}
