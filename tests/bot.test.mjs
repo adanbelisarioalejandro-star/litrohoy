@@ -11,6 +11,7 @@ import { decidirRetiradas } from '../scripts/mejorar.mjs';
 import { porRuta, jwtCuentaServicio, SCOPE_GSC } from '../scripts/medir.mjs';
 import { generar } from '../scripts/informe.mjs';
 import { conBase } from '../scripts/base.mjs';
+import { serieWOB } from '../scripts/europa.mjs';
 
 const pagina = (url, cuerpo, extra = '') => `<html><head><title>T ${url}</title><meta name="description" content="Descripción suficientemente larga para ${url} con datos reales de precios."><link rel="canonical" href="https://x.es${url}">${extra}</head><body><main><h1>H</h1>${cuerpo}</main></body></html>`;
 const texto = (n, semilla = '') => Array.from({ length: n }, (_, i) => `palabra${semilla}${i}`).join(' ');
@@ -114,3 +115,16 @@ test('vista previa: añade la ruta base a enlaces internos, fetch, JSON y URL ab
   assert.equal(conBase('[["Repsol","C/ Mayor",1.5,"/gasolineras/a/b/"]]', '.json', '/litrohoy/', S), '[["Repsol","C/ Mayor",1.5,"/litrohoy/gasolineras/a/b/"]]');
   assert.equal(conBase(`<loc>${S}/a/</loc>`, '.xml', '/litrohoy', S), `<loc>${S}/litrohoy/a/</loc>`);
 });
+
+test('Boletín Petrolero UE: localiza columnas de Portugal y España por nombre y pasa a €/l', () => {
+  const nombres = ['PT_price_with_tax_euro95', 'PT_price_with_tax_diesel', 'ES_price_with_tax_euro95', 'ES_price_with_tax_diesel', 'CTR'];
+  const shared = `<sst>${nombres.map((n) => `<si><t>${n}</t></si>`).join('')}</sst>`;
+  const c = (col, fila, v, s = false) => `<c r="${col}${fila}"${s ? ' t="s"' : ''}><v>${v}</v></c>`;
+  const hoja = `<sheetData><row r="1">${c('B', 1, 4, true)}${c('C', 1, 2, true)}${c('D', 1, 3, true)}${c('F', 1, 0, true)}${c('E', 1, 1, true)}</row>`
+    + `<row r="4">${c('A', 4, 46335)}${c('C', 4, 1730)}${c('D', 4, 1898)}${c('E', 4, 2135)}${c('F', 4, 1922)}</row>`
+    + `<row r="5">${c('A', 5, 46328)}${c('C', 5, 1730)}${c('D', 5, 1898)}${c('E', 5, 2205)}${c('F', 5, 2006)}</row>`
+    + `<row r="6">${c('A', 6, 46321)}${c('C', 6, 1751)}${c('D', 6, 1888)}${c('E', 6, 2189)}</row></sheetData>`; // sin gasolina PT: se descarta
+  assert.deepEqual(serieWOB(shared, hoja), [['2026-11-02', 2.006, 2.205, 1.73, 1.898], ['2026-11-09', 1.922, 2.135, 1.73, 1.898]]);
+  assert.throws(() => serieWOB('<sst></sst>', '<row r="1"></row>'), /faltan columnas/);
+});
+

@@ -67,6 +67,10 @@ jobs:
           ADSENSE_REFRESH_TOKEN: ${{ secrets.ADSENSE_REFRESH_TOKEN }}
         run: node scripts/medir.mjs
 
+      - name: Comparativa UE (Boletín Petrolero, semanal; si falla solo avisa)
+        if: steps.semana.outputs.si == 'true'
+        run: node scripts/europa.mjs
+
       - name: 5. Mejorar
         if: steps.semana.outputs.si == 'true'
         run: node scripts/mejorar.mjs

@@ -4,7 +4,7 @@ import { GUIAS } from '../lib/guias.mjs';
 export function GET({ site }: { site: URL }) {
   const base = site.href.replace(/\/$/, '');
   const urls: [string, string][] = [
-    ...['/', '/buscador/', '/gasolineras/', '/marcas/', '/informe-semanal/'].map((u) => [u, FECHA] as [string, string]),
+    ...['/', '/buscador/', '/gasolineras/', '/marcas/', '/informe-semanal/', '/portugal/'].map((u) => [u, FECHA] as [string, string]),
     ...provincias.map((p) => [p.url, FECHA] as [string, string]),
     ...comunidades.filter((c) => !c.uni).map((c) => [c.url, FECHA] as [string, string]),
     ...marcas.map((m) => [m.url, FECHA] as [string, string]),

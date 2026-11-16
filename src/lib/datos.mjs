@@ -283,3 +283,9 @@ export const carreteras = (() => {
   }).filter((c) => c.conPrecio >= MIN_ESTACIONES_CARRETERA).sort((a, b) => b.conPrecio - a.conPrecio);
 })();
 export const carreterasPublicadas = carreteras.filter((c) => c.publicada);
+
+// ---------- Portugal (Boletín Petrolero UE, semanal; ver scripts/europa.mjs) ----------
+export const europa = json(`${D}/europa.json`, null);
+// provincias españolas con frontera terrestre con Portugal (código INE)
+export const FRONTERA_PT = ['36', '32', '49', '37', '10', '06', '21'];
+

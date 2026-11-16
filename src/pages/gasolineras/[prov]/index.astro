@@ -7,7 +7,8 @@ import TablaEstaciones from '../../../components/TablaEstaciones.astro';
 import Calculadora from '../../../components/Calculadora.astro';
 import Anuncio from '../../../components/Anuncio.astro';
 import { provincias, ccaaPorId, municipios, nacional, serieProvincia, serieNacional, variacion, eur, pct, comparar,
-  tendencia, fechaLarga, FECHA, NOMBRE } from '../../../lib/datos.mjs';
+  tendencia, fechaLarga, FECHA, NOMBRE, europa, FRONTERA_PT } from '../../../lib/datos.mjs';
+const pt = europa && FRONTERA_PT.includes(Astro.props.id ?? '') ? europa.serie.at(-1) : null;
 
 export function getStaticPaths() {
   return provincias.map((p) => ({ params: { prov: p.slug }, props: { id: p.id } }));
@@ -63,6 +64,10 @@ const description = `Gasolineras más baratas de ${p.nombre}: diésel a ${eur(s.
         <td class="n">{eur(m.stats.g95?.media)}</td><td class="n">{eur(m.stats.ga?.media)}</td></tr>))}
     </tbody>
   </table></div>
+  {pt && s.ga && <>
+    <h2>¿Y en Portugal?</h2>
+    <p>{p.nombre} limita con Portugal. Según el Boletín Petrolero de la Comisión Europea (semana del {fechaLarga(pt[0])}), el gasóleo cuesta de media {eur(pt[2])}/l en Portugal y {eur(pt[4])}/l en España, un {Math.abs(((pt[2] - pt[4]) / pt[4]) * 100).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % {pt[2] > pt[4] ? 'más caro' : 'más barato'} en Portugal. Hoy el gasóleo A en {p.nombre} cuesta de media {eur(s.ga.media)}/l, {comparar(s.ga.media, nacional.stats.ga.media, 'España')}. <a href="/portugal/">Ver la comparativa con Portugal →</a></p>
+  </>}
   <Anuncio />
   <p>{!c.uni && <>Más en <a href={c.url}>{c.nombre}</a> · </>}<a href="/gasolineras/">todas las provincias</a> · <a href="/buscador/">buscar gasolineras cerca de mí</a></p>
   <Fuente />

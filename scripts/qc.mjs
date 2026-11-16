@@ -23,7 +23,7 @@ export const textoPrincipal = (html) => (html.match(/<main[^>]*>([\s\S]*)<\/main
 
 export const tipo = (url) => (/^\/gasolineras\/[^/]+\/[^/]+\/$/.test(url) ? 'municipio'
   : /^\/carretera\/[^/]+\/$/.test(url) ? 'carretera'
-  : /^\/(gasolineras|comunidad|marca|carreteras|informe-semanal)\//.test(url) ? 'datos' : url.startsWith('/guias/') && url !== '/guias/' ? 'guia' : 'otra');
+  : /^\/(gasolineras|comunidad|marca|carreteras|informe-semanal|portugal)\//.test(url) ? 'datos' : url.startsWith('/guias/') && url !== '/guias/' ? 'guia' : 'otra');
 
 // MinHash (64 permutaciones) sobre trigramas de palabras: estima la similitud de Jaccard sin comparar conjuntos enteros
 const K = 64;

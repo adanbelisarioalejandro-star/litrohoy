@@ -1,0 +1,46 @@
+---
+// Comparativa España-Portugal: país contra país con la misma fuente (Boletín Petrolero UE) y, para las provincias
+// de frontera, sus precios oficiales del Ministerio frente a la media española. No se mezclan las dos metodologías.
+import Base from '../layouts/Base.astro';
+import Migas from '../components/Migas.astro';
+import Fuente from '../components/Fuente.astro';
+import Grafico from '../components/Grafico.astro';
+import Anuncio from '../components/Anuncio.astro';
+import { europa, FRONTERA_PT, provPorId, nacional, eur, titulo, nombreMunicipio, fechaLarga } from '../lib/datos.mjs';
+
+const [semana, pt95, ptga, es95, esga] = europa.serie.at(-1);
+const dif = (pt, es) => ((pt - es) / es) * 100;
+const txt = (pt, es) => `${Math.abs(dif(pt, es)).toLocaleString('es-ES', { maximumFractionDigits: 1 })} % ${pt > es ? 'más caro' : 'más barato'}`;
+const hace1 = europa.serie.find(([f]) => f >= new Date(new Date(semana).getTime() - 365 * 864e5).toISOString().slice(0, 10));
+const provs = FRONTERA_PT.map((id) => provPorId[id]).filter((p) => p.stats.ga);
+const nombreEst = (e) => (e.r.length <= 3 ? e.r : titulo(e.r));
+const serie = (i) => europa.serie.map((r) => [r[0], r[i]]);
+---
+<Base title="Gasolina y diésel: ¿más barato en España o en Portugal?" description={`Diésel en Portugal a ${eur(ptga)}/l y en España a ${eur(esga)}/l de media (Boletín Petrolero de la UE, semana del ${fechaLarga(semana)}). Precios de hoy en las provincias de la frontera.`}>
+  <Migas items={[['España y Portugal', '/portugal/']]} />
+  <h1>¿Repostar en España o en Portugal? Comparativa de precios</h1>
+  <p class="resumen">Según el Boletín Petrolero de la Comisión Europea de la semana del {fechaLarga(semana)}, el gasóleo cuesta de media <strong>{eur(ptga)}/l en Portugal</strong> y <strong>{eur(esga)}/l en España</strong>: en Portugal es un {txt(ptga, esga)}, {eur(Math.abs(ptga - esga) * 50, 2)} de diferencia en un depósito de 50 litros.
+    La gasolina 95 sale a {eur(pt95)}/l en Portugal y a {eur(es95)}/l en España (un {txt(pt95, es95)} en Portugal).
+    {hace1 && <> Hace un año la diferencia en el gasóleo era de {eur(Math.abs(hace1[2] - hace1[4]))} por litro{hace1[2] > hace1[4] ? ' a favor de España' : ' a favor de Portugal'}.</>}</p>
+  <div class="cifras">
+    <div class="cifra"><small>Gasóleo · Portugal</small><strong>{eur(ptga)}</strong><br /><em>España {eur(esga)}</em></div>
+    <div class="cifra"><small>Gasolina 95 · Portugal</small><strong>{eur(pt95)}</strong><br /><em>España {eur(es95)}</em></div>
+  </div>
+
+  <Grafico titulo="Gasóleo: media de Portugal y de España (Boletín Petrolero UE, semanal)" series={[{ nombre: 'Portugal', puntos: serie(2) }, { nombre: 'España', puntos: serie(4) }]} />
+  <Grafico titulo="Gasolina 95: media de Portugal y de España (Boletín Petrolero UE, semanal)" series={[{ nombre: 'Portugal', puntos: serie(1) }, { nombre: 'España', puntos: serie(3) }]} />
+
+  <h2>Precios de hoy en las provincias de la frontera</h2>
+  <p>Precio medio oficial de hoy en las provincias españolas que limitan con Portugal, comparado con la media de todas las gasolineras de España, y la gasolinera con el diésel más barato de cada una.</p>
+  <div class="tabla"><table>
+    <thead><tr><th>Provincia</th><th class="n">Gasóleo A</th><th class="n">vs. España</th><th class="n">Gasolina 95</th><th>Diésel más barato</th></tr></thead>
+    <tbody>{provs.map((p) => { const d = ((p.stats.ga.media - nacional.stats.ga.media) / nacional.stats.ga.media) * 100; const b = p.stats.ga.barata; return (
+      <tr><td><a href={p.url}>{p.nombre}</a></td><td class="n">{eur(p.stats.ga.media)}</td><td class:list={['n', d > 0 ? 'sube' : 'baja']}>{(d > 0 ? '+' : '') + d.toFixed(1).replace('.', ',')} %</td><td class="n">{eur(p.stats.g95?.media)}</td><td>{eur(p.stats.ga.min)} · {nombreEst(b)} ({nombreMunicipio(b.m)})</td></tr>); })}</tbody>
+  </table></div>
+  <Anuncio />
+
+  <h2>Cómo leer esta comparativa</h2>
+  <p>Comparamos Portugal con España usando la misma fuente para los dos países: el Boletín Petrolero, en el que cada Estado comunica a la Comisión Europea sus precios más frecuentes con impuestos, como media ponderada. Esa media no es directamente comparable con la de nuestras páginas, que es la media simple de todas las gasolineras, por eso no la mezclamos con los precios provinciales. La propia Comisión advierte de que las comparaciones entre países tienen una validez limitada por las diferencias de calidad del producto, de prácticas comerciales y de estructura de mercado. Los precios de Portugal son medias nacionales: cerca de la frontera pueden ser distintos.</p>
+  <p class="fuente"><strong>Fuente de los datos de Portugal y de la media de España del boletín:</strong> <a href="https://energy.ec.europa.eu/data-and-analysis/weekly-oil-bulletin_en" rel="nofollow noopener" target="_blank">Comisión Europea, Weekly Oil Bulletin</a> (© Unión Europea, reutilización autorizada citando la fuente, CC BY 4.0), semana del <time datetime={semana}>{fechaLarga(semana)}</time>. Elaboración propia: precios convertidos de €/1.000 l a €/l.</p>
+  <Fuente />
+</Base>
