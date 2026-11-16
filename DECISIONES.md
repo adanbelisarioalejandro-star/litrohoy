@@ -56,3 +56,12 @@ Evalué 5 nichos con datos públicos y gratuitos (puntuación de 1 a 5; valor pu
 - **Search Console**: con una cuenta de servicio de Google Cloud con permiso de *solo lectura* en la propiedad (scope `webmasters.readonly`).
 - **AdSense Management API**: no admite cuentas de servicio, así que usa OAuth de usuario con scope `adsense.readonly`. El refresh token se guarda como secreto de GitHub. Las dos cosas necesitan tu OK.
 - **Mejora**: los municipios publicados hace más de 90 días con 0 impresiones pasan a `noindex` y salen del sitemap (`data/retiradas.json`). El orden de ampliación da prioridad a las provincias cuyas páginas tienen más impresiones.
+
+## 7. Decisiones tomadas durante la revisión
+- **Variaciones solo con dato oficial cercano**: una variación (7 días, 30 días o 1 año) solo se muestra si hay un dato oficial como mucho 3 días antes de la fecha objetivo. Para la variación anual, el bot descarga cada día el histórico exacto de hace 365 días. Motivo: no mostrar nunca cifras aproximadas como si fueran exactas.
+- **Sin página propia para las CCAA de una sola provincia** (Madrid, Asturias, Murcia, etc.): duplicaban la página provincial, y el QC lo detectó como título duplicado. Su enlace apunta a la provincia y en los textos se nombran como «la Comunidad de Madrid».
+- **Nombres y direcciones normalizados para mostrarlos**: «Coruña (A)» pasa a «A Coruña», se expanden abreviaturas (CR a Ctra.), se marcan los puntos kilométricos, etc. Si la fuente trae un dato dudoso (por ejemplo, «km 283»), se muestra tal cual: corregirlo sería inventar.
+- **Las gasolineras sin precio de los carburantes de la tabla** se muestran al final, marcadas «Sin precio publicado», y no cuentan en el número de gasolineras con precio.
+- **Marca con página propia**: 25 o más estaciones *con precio de gasolina o diésel* (Molgas, por ejemplo, solo vende gas y quedaba vacía).
+- **Identidad de git neutra** (`LitroHoy <litrohoy@users.noreply.github.com>`), configurada solo en este repositorio, para no publicar tu correo en un repositorio público. Puedes cambiarla con `git config user.email`.
+- **Nombre de marca LitroHoy**: corto y descriptivo, sin marcas registradas de terceros. El dominio litrohoy.com estaba libre el 16-11-2026 según RDAP.
