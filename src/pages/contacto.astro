@@ -1,12 +1,13 @@
 ---
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
+import { TITULAR } from '../lib/titular.mjs';
 ---
 <Base title="Contacto | LitroHoy" description="Cómo contactar con LitroHoy para avisar de un precio incorrecto, sugerir mejoras o hacer consultas sobre los datos.">
   <Migas items={[['Contacto', '/contacto/']]} />
   <article class="guia">
     <h1>Contacto</h1>
-    <p>Puedes escribirnos a <a href="mailto:[RELLENAR: correo electrónico de contacto]"><strong>[RELLENAR: correo electrónico de contacto]</strong></a>. Respondemos en unos días laborables.</p>
+    <p>Puedes escribirnos a <a href={`mailto:${TITULAR.correo}`}><strong>{TITULAR.correo}</strong></a>. Respondemos en unos días laborables.</p>
     <h2>¿Has visto un precio incorrecto?</h2>
     <p>Los precios los comunica cada gasolinera al Ministerio para la Transición Ecológica y el Reto Demográfico, y nosotros los mostramos tal cual. Si un precio no coincide con el del surtidor, lo más eficaz es avisar a la propia estación o al Ministerio a través del <a href="https://geoportalgasolineras.es/" rel="nofollow noopener" target="_blank">Geoportal de Hidrocarburos</a>. También puedes contárnoslo: si vemos un error claro en la fuente, lo señalaremos.</p>
     <h2>Otras consultas</h2>

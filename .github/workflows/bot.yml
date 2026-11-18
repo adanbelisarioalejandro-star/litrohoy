@@ -35,6 +35,11 @@ jobs:
       PUBLIC_ADSENSE_ID: ${{ vars.PUBLIC_ADSENSE_ID }}
       PUBLIC_ADSENSE_SLOT: ${{ vars.PUBLIC_ADSENSE_SLOT }}
       BASE_PATH: ${{ vars.BASE_PATH }} # solo vista previa en github.io (p. ej. /litrohoy); vacía con dominio propio
+      # datos del titular (aviso legal, privacidad, contacto, sobre): variables del repositorio, nunca en el código
+      TITULAR_NOMBRE: ${{ vars.TITULAR_NOMBRE }}
+      TITULAR_NIF: ${{ vars.TITULAR_NIF }}
+      TITULAR_DOMICILIO: ${{ vars.TITULAR_DOMICILIO }}
+      TITULAR_CORREO: ${{ vars.TITULAR_CORREO }}
       MAPA_PROVEEDOR: ${{ vars.MAPA_PROVEEDOR }} # proveedor de teselas (src/lib/mapa.mjs); vacía = OpenStreetMap
       AVISO_FILE: ${{ github.workspace }}/aviso.md
     steps:

@@ -8,6 +8,8 @@ export const UMBRAL_SIMILITUD = 0.9;
 // Diferencia máxima admitida (€/l) entre la diferencia de impuestos gasóleo A − B que afirma una guía y la real de precios
 export const TOLERANCIA_FISCAL = 0.06;
 const MIN_PALABRAS = { datos: 250, guia: 400, otra: 120 };
+// contacto y legales son cortas por naturaleza: sin mínimo de palabras (el resto de comprobaciones sí se aplica)
+const SIN_MINIMO = new Set(['/contacto/', '/aviso-legal/', '/privacidad/', '/cookies/']);
 const NOINDEX = /<meta name="robots" content="noindex/;
 
 export function paginas(dir, base = dir) {
@@ -56,10 +58,12 @@ export function revisar(url, html) {
   if (!desc || desc.length < 50) fallos.push('sin meta description (o demasiado corta)');
   if (!/<link rel="canonical" href="https?:\/\/[^"]+"/.test(html)) fallos.push('sin canonical');
   if (!/<h1[\s>]/.test(html)) fallos.push('sin <h1>');
+  // en el bot (GitHub Actions) no se publica ningún hueco sin rellenar, p. ej. si falta una variable TITULAR_*
+  if (process.env.GITHUB_ACTIONS && html.includes('[RELLENAR')) fallos.push('tiene un hueco [RELLENAR] sin rellenar (¿falta una variable TITULAR_* en GitHub?)');
   const texto = textoPrincipal(html);
   const palabras = texto.split(' ').length;
   const min = t === 'guia' ? MIN_PALABRAS.guia : t === 'otra' ? MIN_PALABRAS.otra : MIN_PALABRAS.datos;
-  if (palabras < min) fallos.push(`contenido escaso: ${palabras} palabras (mínimo ${min})`);
+  if (!SIN_MINIMO.has(url) && palabras < min) fallos.push(`contenido escaso: ${palabras} palabras (mínimo ${min})`);
   if (t === 'municipio' || t === 'datos' || t === 'carretera') {
     if (!html.includes('class="fuente"') || !/<time datetime="\d{4}-\d{2}-\d{2}"/.test(html)) fallos.push('no muestra la fuente y la fecha de actualización');
     const precios = (texto.match(/\d,\d{3} €/g) ?? []).length;

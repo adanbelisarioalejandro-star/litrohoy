@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
+import { TITULAR } from '../lib/titular.mjs';
 import { MAPA } from '../lib/mapa.mjs';
 ---
 <Base title="Política de privacidad | LitroHoy" description="Cómo trata LitroHoy los datos personales conforme al RGPD y la LOPDGDD: qué datos, con qué finalidad, durante cuánto tiempo y tus derechos.">
@@ -9,7 +10,7 @@ import { MAPA } from '../lib/mapa.mjs';
     <h1>Política de privacidad</h1>
     <p>Esta política explica cómo se tratan los datos personales en LitroHoy, conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD).</p>
     <h2>1. Responsable del tratamiento</h2>
-    <ul><li>Responsable: [RELLENAR: nombre y apellidos o razón social]</li><li>NIF/NIE: [RELLENAR]</li><li>Domicilio: [RELLENAR]</li><li>Correo electrónico: [RELLENAR]</li></ul>
+    <ul><li>Responsable: {TITULAR.nombre}</li><li>NIF/NIE: {TITULAR.nif}</li><li>Domicilio: {TITULAR.domicilio}</li><li>Correo electrónico: <a href={`mailto:${TITULAR.correo}`}>{TITULAR.correo}</a></li></ul>
     <h2>2. Qué datos tratamos y para qué</h2>
     <p><strong>No pedimos registro ni tenemos formularios.</strong> Solo se tratan datos en estos casos:</p>
     <ul>

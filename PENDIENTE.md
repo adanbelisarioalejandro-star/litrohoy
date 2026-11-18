@@ -25,8 +25,7 @@ AdSense exige un sitio propio; los subdominios `*.github.io` no suelen aprobarse
 5. En `Settings → Secrets and variables → Actions → Variables`: cambia `SITE_URL` a `https://litrohoy.com` y **borra `BASE_PATH`** (quita la vista previa y el `noindex`).
 
 ## 3. Datos legales (personales: solo tú)
-Rellena los huecos `[RELLENAR]` (nombre o razón social, NIF, domicilio y correo de contacto) en:
-`src/pages/aviso-legal.astro`, `src/pages/privacidad.astro` y `src/pages/contacto.astro`. Después: `git commit -am "Datos legales" && git push`.
+Hecho (18-11-2026). Los datos del titular están en las variables del repositorio `TITULAR_NOMBRE`, `TITULAR_NIF`, `TITULAR_DOMICILIO` y `TITULAR_CORREO` (`Settings → Secrets and variables → Actions → Variables`) y se insertan al compilar; no están en el código. Para cambiarlos, edita la variable y lanza el bot. Si falta alguna, el control de calidad bloquea la publicación.
 
 ## 4. Search Console (gratis)
 1. Añade la propiedad de tipo **Dominio** `litrohoy.com` en https://search.google.com/search-console y verifícala con el registro TXT que te indique.

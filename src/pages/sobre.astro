@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
+import { TITULAR } from '../lib/titular.mjs';
 import { estaciones, municipiosPublicados, provincias, FECHAS_HIST } from '../lib/datos.mjs';
 ---
 <Base title="Sobre LitroHoy: quién lo hace y de dónde salen los datos" description="LitroHoy es un comparador independiente de precios de carburantes en España basado en los datos oficiales del Ministerio, actualizados cada día.">
@@ -9,10 +10,9 @@ import { estaciones, municipiosPublicados, provincias, FECHAS_HIST } from '../li
     <h1>Sobre LitroHoy</h1>
     <p>LitroHoy nace con un objetivo sencillo: que encuentres en segundos la gasolinera más barata de tu zona y entiendas por qué el precio sube o baja. Llenar un depósito de 50 litros en la gasolinera más barata de un municipio en vez de en la más cara puede suponer varios euros de diferencia, y en un año de repostajes la cifra se nota.</p>
     <h2>Quién hace LitroHoy y por qué</h2>
-    <p>[RELLENAR: quién hace LitroHoy (tu nombre o el de tu empresa) y una o dos frases sobre ti]</p>
-    <p>[RELLENAR: por qué empezaste LitroHoy]</p>
-    <p>[RELLENAR: cómo revisas las guías y los datos]</p>
-    <p>Los precios, el control de calidad y la publicación se actualizan cada día con un proceso automático.</p>
+    <p>LitroHoy lo hace {TITULAR.nombre}, desde Vigo.</p>
+    <p>Los precios de las gasolineras son datos públicos, pero consultarlos no es cómodo, y en 2026, con las rebajas de impuestos cambiando cada mes, costaba saber qué estabas pagando de verdad. Quería una web que lo mostrara claro, municipio a municipio, y que se actualizara sola cada día.</p>
+    <p>Las guías se redactan con ayuda de herramientas de inteligencia artificial, y cada cifra se contrasta con su fuente oficial (BOE, Ministerio, Agencia Tributaria, INE, DGT o IDAE), que se cita al final de cada guía. Los precios llegan cada día del Ministerio y pasan un control automático antes de publicarse. Si ves un error, <a href="/contacto/">escríbeme</a> y lo corrijo.</p>
     <h2>De dónde salen los datos</h2>
     <p>Desde la Orden ITC/2308/2007, quienes gestionan una gasolinera en España están obligados a comunicar sus precios al Ministerio cada lunes y siempre que los cambien, y el Ministerio los publica como datos abiertos. Cada día se descargan de forma automática los precios de las {estaciones.length.toLocaleString('es-ES', { useGrouping: 'always' })} estaciones terrestres con precio publicado, se comprueba que el formato es correcto y se recalculan todas las páginas. Se guarda un resumen diario por municipio para mostrar la evolución: ahora mismo hay {FECHAS_HIST.length} días de histórico.</p>
     <h2>Qué encontrarás</h2>
