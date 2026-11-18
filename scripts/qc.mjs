@@ -79,6 +79,9 @@ export function controlar(dir) {
     const html = readFileSync(p.fichero, 'utf8');
     // retiradas: fuera del índice, no cuentan. En la vista previa (BASE_PATH) todo es noindex y se revisa todo igual
     if (!process.env.BASE_PATH && NOINDEX.test(html)) continue;
+    // copias declaradas con canonical a otra URL (el último informe semanal archivado = /informe-semanal/): se revisa la original
+    const can = html.match(/<link rel="canonical" href="([^"]+)"/)?.[1];
+    if (can && new URL(can).pathname !== p.url) continue;
     res.push({ url: p.url, ...revisar(p.url, html) });
   }
   // títulos y descripciones únicos

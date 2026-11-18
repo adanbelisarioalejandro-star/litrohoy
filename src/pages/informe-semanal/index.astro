@@ -1,0 +1,7 @@
+---
+// El informe semanal más reciente. Cada semana el bot lo congela (scripts/archivar-informe.mjs) y queda también en /informe-semanal/AAAA-MM-DD/.
+import InformeSemanal from '../../components/InformeSemanal.astro';
+import { calcularInforme, informesArchivados } from '../../lib/informe.mjs';
+const inf = informesArchivados[0] ?? calcularInforme(); // sin ningún informe archivado todavía, el de hoy
+---
+<InformeSemanal inf={inf} todos={informesArchivados} path="/informe-semanal/" actual />

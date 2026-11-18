@@ -1,0 +1,67 @@
+---
+// Pinta un informe semanal congelado (src/lib/informe.mjs) y el índice de todos los informes.
+import Base from '../layouts/Base.astro';
+import Migas from './Migas.astro';
+import Fuente from './Fuente.astro';
+import Grafico from './Grafico.astro';
+import Anuncio from './Anuncio.astro';
+import { num, eur, pct, fechaLarga, NOMBRE } from '../lib/datos.mjs';
+import { urlsVivas } from '../lib/informe.mjs';
+interface Props { inf: any; todos: any[]; path: string; actual: boolean }
+const { inf, todos, path, actual } = Astro.props;
+const { desde, fecha, nac, provs, marcas: mGa, ahorro, mayor } = inf;
+const cent = (precio, v) => (precio - precio / (1 + v / 100)) * 100; // variación en céntimos a partir del % y el precio actual
+const sube = (v) => (v > 0 ? 'ha subido' : 'ha bajado');
+const rGa = provs.ga, cara = mGa.at(-1);
+// títulos según el sentido real: si todas suben (o todas bajan) no hay "provincias donde baja"
+const titulo = (r, n) => (r.at(-1).v >= 0 && r[0].v > 0 ? `Provincias donde más y donde menos sube ${n}` : r[0].v <= 0 ? `Provincias donde menos y donde más baja ${n}` : `Provincias donde más sube y más baja ${n}`);
+// tablas: 5 primeras y 5 últimas (null = separador)
+const tablas = [['el diésel', provs.ga], ['la gasolina 95', provs.g95]].filter(([, r]) => r.length).map(([n, r]) => [titulo(r, n), r.length > 10 ? [...r.slice(0, 5), null, ...r.slice(-5)] : r]);
+// "del 9 al 16 de noviembre de 2026" (o con mes/año completo si la semana cruza de mes)
+const rango = desde.slice(0, 7) === fecha.slice(0, 7) ? `del ${+desde.slice(8)} al ${fechaLarga(fecha)}` : `del ${fechaLarga(desde)} al ${fechaLarga(fecha)}`;
+const title = `Informe semanal de precios de la gasolina y el diésel, ${rango}`;
+---
+<Base title={title} path={path} description={`Qué provincias suben y bajan más esta semana, qué marcas son más baratas y cuánto se ahorra eligiendo bien la gasolinera. Datos oficiales ${rango}.`}>
+  <Migas items={path === '/informe-semanal/' ? [['Informe semanal', '/informe-semanal/']] : [['Informe semanal', '/informe-semanal/'], [fechaLarga(fecha), `/informe-semanal/${fecha}/`]]} />
+  <h1>Informe semanal de precios de carburantes{!actual && <>: {rango}</>}</h1>
+  {!actual && <p><small>Este es un informe archivado, con los datos de esa semana. <a href="/informe-semanal/">Ver el informe más reciente →</a></small></p>}
+  <p class="resumen">{rango[0].toUpperCase() + rango.slice(1)}, según los precios oficiales de las {num(nac.ga.n)} gasolineras con diésel de España.
+    {nac.ga.v != null && <> El gasóleo A {sube(nac.ga.v)} un {pct(Math.abs(nac.ga.v)).replace('+', '')} en la semana y cuesta de media <strong>{eur(nac.ga.media)}/l</strong>.</>}
+    {nac.g95.v != null && <> La gasolina 95 {sube(nac.g95.v)} un {pct(Math.abs(nac.g95.v)).replace('+', '')} y su precio medio es <strong>{eur(nac.g95.media)}/l</strong>.</>}
+    {rGa.length > 1 && <> Por provincias, donde {rGa[0].v > 0 ? 'más ha subido' : 'menos ha bajado'} el diésel es {rGa[0].nombre} ({pct(rGa[0].v)}) y donde {rGa.at(-1).v < 0 ? 'más ha bajado' : 'menos ha subido'}, {rGa.at(-1).nombre} ({pct(rGa.at(-1).v)}).</>}
+    {' '}En los municipios con {ahorro.min} o más gasolineras, repostar en la más barata en lugar de en una de precio medio ahorra de media <strong>{eur(ahorro.mediaMin)} por litro</strong> de diésel, {eur(ahorro.mediaMin * 50, 2)} en un depósito de 50 litros.</p>
+  <div class="cifras">
+    {(['ga', 'g95'] as const).map((f) => <div class="cifra"><small>{NOMBRE[f]} · media España</small><strong>{eur(nac[f].media)}</strong><br />{nac[f].v != null && <em class={nac[f].v > 0 ? 'sube' : 'baja'}>7 días {pct(nac[f].v)}</em>}</div>)}
+    <div class="cifra"><small>Ahorro medio por depósito</small><strong>{eur(ahorro.mediaMin * 50, 2)}</strong><br /><em>50 l de diésel, más barata vs. media local</em></div>
+  </div>
+
+  <Grafico titulo="Precio medio en España en los 30 días anteriores" series={[{ nombre: 'Gasóleo A', puntos: inf.serie.ga }, { nombre: 'Gasolina 95', puntos: inf.serie.g95 }]} />
+
+  {tablas.map(([t, filas]) => <>
+    <h2>{t} esta semana</h2>
+    <div class="tabla"><table>
+      <thead><tr><th>Provincia</th><th class="n">Precio</th><th class="n">7 días</th><th class="n">Por litro</th></tr></thead>
+      <tbody>{filas.map((x) => x
+        ? <tr><td>{urlsVivas.has(x.url) ? <a href={x.url}>{x.nombre}</a> : x.nombre}</td><td class="n">{eur(x.precio)}</td><td class:list={['n', x.v > 0 ? 'sube' : 'baja']}>{pct(x.v)}</td><td class="n">{(x.v > 0 ? '+' : '') + num(cent(x.precio, x.v), 1)} cént.</td></tr>
+        : <tr><td colspan="4"><small>…</small></td></tr>)}</tbody>
+    </table></div>
+  </>)}
+  <Anuncio />
+
+  {mGa.length > 1 && <>
+    <h2>Marcas más baratas (gasóleo A)</h2>
+    <ol>{mGa.slice(0, 5).map((m) => <li>{urlsVivas.has(m.url) ? <a href={m.url}>{m.nombre}</a> : m.nombre}: {eur(m.media)}/l de media en {num(m.est)} estaciones</li>)}</ol>
+    <p>La más cara de las marcas con página propia era {urlsVivas.has(cara.url) ? <a href={cara.url}>{cara.nombre}</a> : cara.nombre} ({eur(cara.media)}/l). La media de cada marca depende también de las provincias en las que está. <a href="/marcas/">Ver el ranking de hoy →</a></p>
+  </>}
+
+  <h2>Cuánto se ahorra eligiendo gasolinera</h2>
+  <p>En los {num(ahorro.n)} municipios con {ahorro.min} o más gasolineras con diésel, la diferencia media entre la más barata y la más cara es de {eur(ahorro.maxMin)} por litro ({eur(ahorro.maxMin * 50, 2)} por depósito). Donde más se notaba:</p>
+  <ol>{mayor.map((m) => <li>{urlsVivas.has(m.url) ? <a href={m.url}>{m.nombre}</a> : m.nombre} ({m.prov}): de {eur(m.min)} a {eur(m.max)}, {eur(m.max - m.min)} de diferencia</li>)}</ol>
+  <p><small>Cómo se calcula: variación entre el precio medio oficial del {fechaLarga(fecha)} y el de 7 días antes; el ahorro compara, en cada municipio, la media de sus gasolineras con la más barata. Detalles en la <a href="/metodologia/">metodología</a>.</small></p>
+  <Fuente fecha={fecha} />
+
+  {todos.length > 0 && <>
+    <h2>Todos los informes semanales</h2>
+    <ul>{todos.map((i) => <li>{i.fecha === fecha ? <strong>{fechaLarga(i.fecha)} (este informe)</strong> : <a href={`/informe-semanal/${i.fecha}/`}>{fechaLarga(i.fecha)}</a>}: gasóleo A {eur(i.nac.ga.media)}/l{i.nac.ga.v != null && ` (${pct(i.nac.ga.v)})`}, gasolina 95 {eur(i.nac.g95.media)}/l{i.nac.g95.v != null && ` (${pct(i.nac.g95.v)})`}</li>)}</ul>
+  </>}
+</Base>

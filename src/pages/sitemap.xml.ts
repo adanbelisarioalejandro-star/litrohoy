@@ -1,5 +1,6 @@
 import { provincias, comunidades, marcas, municipiosPublicados, carreterasPublicadas, FECHA } from '../lib/datos.mjs';
 import { GUIAS } from '../lib/guias.mjs';
+import { informesArchivados } from '../lib/informe.mjs';
 
 export function GET({ site }: { site: URL }) {
   const base = site.href.replace(/\/$/, '');

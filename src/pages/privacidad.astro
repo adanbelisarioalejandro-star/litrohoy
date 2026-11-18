@@ -1,6 +1,7 @@
 ---
 import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
+import { MAPA } from '../lib/mapa.mjs';
 ---
 <Base title="Política de privacidad | LitroHoy" description="Cómo trata LitroHoy los datos personales conforme al RGPD y la LOPDGDD: qué datos, con qué finalidad, durante cuánto tiempo y tus derechos.">
   <Migas items={[['Política de privacidad', '/privacidad/']]} />
@@ -15,7 +16,7 @@ import Migas from '../components/Migas.astro';
       <li><strong>Correos que nos envíes</strong>: nombre, dirección de correo y lo que nos cuentes, para responderte. Base jurídica: tu consentimiento al escribirnos (art. 6.1.a RGPD). Se conservan el tiempo necesario para atender la consulta y, como máximo, un año.</li>
       <li><strong>Registros técnicos del servidor</strong>: el proveedor de alojamiento (GitHub Pages, de GitHub Inc.) puede registrar la dirección IP y datos técnicos de la visita por motivos de seguridad. Base jurídica: interés legítimo en mantener el sitio seguro (art. 6.1.f RGPD).</li>
       <li><strong>Publicidad</strong>: cuando hay anuncios activos, Google (Google Ireland Ltd.) puede usar cookies o identificadores para mostrar anuncios y medir su rendimiento, <strong>solo si das tu consentimiento</strong> en el mensaje de privacidad que aparece al entrar (art. 6.1.a RGPD). Si no lo das, Google puede mostrar anuncios no personalizados o limitados. Más información en <a href="https://policies.google.com/technologies/partner-sites?hl=es" rel="nofollow noopener" target="_blank">cómo usa Google los datos de los sitios que usan sus servicios</a>.</li>
-      <li><strong>Mapas</strong>: los mapas de las páginas de municipio no se cargan hasta que pulsas «Mostrar mapa». Entonces tu navegador descarga las imágenes del mapa de los servidores de OpenStreetMap (OpenStreetMap Foundation, Reino Unido), que reciben tu dirección IP como en cualquier descarga, según su <a href="https://osmfoundation.org/wiki/Privacy_Policy" rel="nofollow noopener" target="_blank">política de privacidad</a>. No se instalan cookies. Base jurídica: tu petición al pulsar el botón (art. 6.1.f RGPD).</li>
+      <li><strong>Mapas</strong>: los mapas de las páginas de municipio no se cargan hasta que pulsas «Mostrar mapa». Entonces tu navegador descarga las imágenes del mapa de los servidores de {MAPA.nombre} ({MAPA.titular}), que reciben tu dirección IP como en cualquier descarga, según su <a href={MAPA.privacidad} rel="nofollow noopener" target="_blank">política de privacidad</a>. No se instalan cookies. Base jurídica: tu petición al pulsar el botón (art. 6.1.f RGPD).</li>
       <li><strong>Buscador por ubicación</strong>: si pulsas «Usar mi ubicación», tu navegador calcula las distancias en tu propio dispositivo. Tu ubicación no se envía ni se guarda en ningún servidor nuestro.</li>
     </ul>
     <p>No hacemos perfiles propios ni tomamos decisiones automatizadas que te afecten, y no vendemos datos.</p>

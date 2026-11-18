@@ -52,7 +52,7 @@ const description = `Las ${num(c.est.length)} gasolineras de la ${c.nombre} orde
     <h2>Precio de la {c.nombre} por provincia</h2>
     <div class="tabla"><table>
       <thead><tr><th>Provincia</th><th class="n">Tramo</th><th class="n">Gasolineras</th><th class="n">Gasóleo A</th><th class="n">Gasolina 95</th></tr></thead>
-      <tbody>{tramos.map((t) => <tr><td><a href={t.p.url}>{t.p.nombre}</a></td><td class="n">km {km(t.desde)}–{km(t.hasta)}</td><td class="n">{num(t.n)}</td><td class="n">{t.s.ga ? eur(t.s.ga.media) : '—'}</td><td class="n">{t.s.g95 ? eur(t.s.g95.media) : '—'}</td></tr>)}</tbody>
+      <tbody>{tramos.map((t) => <tr><td><a href={t.p.url}>{t.p.nombre}</a></td><td class="n">km {t.desde === t.hasta ? km(t.desde) : `${km(t.desde)}–${km(t.hasta)}`}</td><td class="n">{num(t.n)}</td><td class="n">{t.s.ga ? eur(t.s.ga.media) : '—'}</td><td class="n">{t.s.g95 ? eur(t.s.g95.media) : '—'}</td></tr>)}</tbody>
     </table></div>
   </>}
   <Anuncio />

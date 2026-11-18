@@ -1,7 +1,8 @@
 ---
-// Mapa de las gasolineras del municipio (OpenStreetMap + Leaflet alojado aquí). No carga nada hasta que se pulsa:
-// así no afecta a la velocidad (LCP/CLS) ni envía datos a OpenStreetMap sin que el usuario lo pida.
+// Mapa de las gasolineras (Leaflet alojado aquí + teselas del proveedor de src/lib/mapa.mjs). No carga nada hasta que se pulsa:
+// así no afecta a la velocidad (LCP/CLS) ni envía datos al proveedor sin que el usuario lo pida.
 import { num, eur, titulo, direccion } from '../lib/datos.mjs';
+import { MAPA } from '../lib/mapa.mjs';
 interface Props { est: any[]; zona: string; principal: 'ga' | 'g95' }
 const { est, zona, principal } = Astro.props;
 const conPos = est.filter((e) => e.lat && e.lon);
@@ -17,10 +18,11 @@ const carb = principal === 'ga' ? 'gasóleo A' : 'gasolina 95';
   <h2>Mapa de las gasolineras de {zona}</h2>
   <p>{num(conPos.length)} gasolineras situadas con las coordenadas oficiales del Ministerio. Color según el precio del {carb}:
     <span class="lv l0">verde</span>, el tercio más barato; <span class="lv l1">ámbar</span>, el intermedio; <span class="lv l2">rojo</span>, el más caro{precios.length < conPos.length && <>; <span class="lv l3">gris</span>, sin precio de {carb}</>}.</p>
-  <div class="mapa" id="mapa" data-src="/vendor/leaflet-1.9.4/">
+  <div class="mapa" id="mapa" data-src="/vendor/leaflet-1.9.4/" data-teselas={MAPA.teselas} data-zoom={MAPA.maxZoom} data-atribucion={MAPA.atribucion}>
     <button type="button" id="mapa-btn">Mostrar mapa</button>
-    <small>Al mostrarlo se cargan imágenes de OpenStreetMap.</small>
+    <small>Al mostrarlo se cargan imágenes de {MAPA.nombre}.</small>
   </div>
+  {MAPA.corregir && <p><small>¿Ves un error en el mapa? <a href={MAPA.corregir} rel="nofollow noopener" target="_blank">Avisa a {MAPA.nombre}</a>.</small></p>}
   <script type="application/json" id="mapa-datos" set:html={JSON.stringify(datos)} />
 </section>}
 
@@ -38,8 +40,8 @@ const carb = principal === 'ga' ? 'gasóleo A' : 'gasolina 95';
     caja!.textContent = '';
     caja!.style.display = 'block'; // el flex del botón interfiere con las capas de Leaflet
     const mapa = L.map(caja, { scrollWheelZoom: false });
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">colaboradores de OpenStreetMap</a>' }).addTo(mapa);
+    const { teselas, zoom, atribucion } = caja!.dataset;
+    L.tileLayer(teselas, { maxZoom: +zoom!, attribution: atribucion }).addTo(mapa);
     const color = ['#1a7f37', '#b7791f', '#c62828', '#777'];
     const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
     const capas = puntos.map(([lat, lon, nombre, dir, ga, g95, n]) => L.circleMarker([lat, lon], { radius: 8, weight: 2, color: '#fff', fillColor: color[n], fillOpacity: 0.95 })

@@ -3,24 +3,26 @@ import Base from '../layouts/Base.astro';
 import Migas from '../components/Migas.astro';
 import { estaciones, municipiosPublicados, provincias, FECHAS_HIST } from '../lib/datos.mjs';
 ---
-<Base title="Sobre LitroHoy: quiénes somos y de dónde salen los datos" description="LitroHoy es un comparador independiente de precios de carburantes en España basado en los datos oficiales del Ministerio, actualizados cada día.">
+<Base title="Sobre LitroHoy: quién lo hace y de dónde salen los datos" description="LitroHoy es un comparador independiente de precios de carburantes en España basado en los datos oficiales del Ministerio, actualizados cada día.">
   <Migas items={[['Sobre LitroHoy', '/sobre/']]} />
   <article class="guia">
     <h1>Sobre LitroHoy</h1>
     <p>LitroHoy nace con un objetivo sencillo: que encuentres en segundos la gasolinera más barata de tu zona y entiendas por qué el precio sube o baja. Llenar un depósito de 50 litros en la gasolinera más barata de un municipio en vez de en la más cara puede suponer varios euros de diferencia, y en un año de repostajes la cifra se nota.</p>
     <h2>Quién hace LitroHoy y por qué</h2>
-    <p>LitroHoy lo hace <strong>[RELLENAR: tu nombre o el de tu empresa]</strong>, [RELLENAR: una o dos frases sobre ti, por ejemplo tu relación con los datos, la programación o la conducción]. Lo empezamos en 2026, cuando el precio del carburante se disparó con la crisis de Oriente Medio y las rebajas fiscales cambiaban cada mes: queríamos una web que explicara el precio de cada gasolinera con datos oficiales y sin rodeos.</p>
-    <p>La web se actualiza sola cada día con un proceso automático (precios, control de calidad y publicación), y las guías las revisamos a mano contra el BOE, el Ministerio, la DGT, el IDAE y el INE.</p>
+    <p>[RELLENAR: quién hace LitroHoy (tu nombre o el de tu empresa) y una o dos frases sobre ti]</p>
+    <p>[RELLENAR: por qué empezaste LitroHoy]</p>
+    <p>[RELLENAR: cómo revisas las guías y los datos]</p>
+    <p>Los precios, el control de calidad y la publicación se actualizan cada día con un proceso automático.</p>
     <h2>De dónde salen los datos</h2>
-    <p>Desde la Orden ITC/2308/2007, quienes gestionan una gasolinera en España están obligados a comunicar sus precios al Ministerio cada lunes y siempre que los cambien, y el Ministerio los publica como datos abiertos. Cada día descargamos de forma automática los precios de las {estaciones.length.toLocaleString('es-ES', { useGrouping: 'always' })} estaciones terrestres con precio publicado, comprobamos que el formato es correcto y recalculamos todas las páginas. Guardamos un resumen diario por municipio para poder mostrarte la evolución: ahora mismo tenemos {FECHAS_HIST.length} días de histórico.</p>
+    <p>Desde la Orden ITC/2308/2007, quienes gestionan una gasolinera en España están obligados a comunicar sus precios al Ministerio cada lunes y siempre que los cambien, y el Ministerio los publica como datos abiertos. Cada día se descargan de forma automática los precios de las {estaciones.length.toLocaleString('es-ES', { useGrouping: 'always' })} estaciones terrestres con precio publicado, se comprueba que el formato es correcto y se recalculan todas las páginas. Se guarda un resumen diario por municipio para mostrar la evolución: ahora mismo hay {FECHAS_HIST.length} días de histórico.</p>
     <h2>Qué encontrarás</h2>
     <ul>
-      <li>Precios de hoy y comparativa en las {provincias.length} provincias, en cada comunidad autónoma y en {municipiosPublicados.length} municipios (vamos añadiendo más cada semana cuando hay datos suficientes).</li>
+      <li>Precios de hoy y comparativa en las {provincias.length} provincias, en cada comunidad autónoma y en {municipiosPublicados.length} municipios (se añaden más cada semana cuando hay datos suficientes).</li>
       <li>Rankings por marca, gráficos de evolución y un <a href="/buscador/">buscador por cercanía</a>.</li>
       <li><a href="/guias/">Guías</a> sobre impuestos, tipos de carburante y ahorro, con cada dato contrastado con su fuente oficial.</li>
     </ul>
     <h2>Independencia</h2>
     <p>LitroHoy es un proyecto independiente: no tiene relación con el Ministerio ni con ninguna petrolera o cadena de gasolineras. El orden de las tablas es siempre por precio y no se puede pagar por aparecer antes. El sitio se financia con publicidad, claramente identificada como tal.</p>
-    <p>Más detalles en <a href="/metodologia/">cómo calculamos los datos</a>. ¿Dudas o sugerencias? <a href="/contacto/">Escríbenos</a>.</p>
+    <p>Más detalles en <a href="/metodologia/">cómo se calculan los datos</a>. ¿Dudas o sugerencias? <a href="/contacto/">Contacto</a>.</p>
   </article>
 </Base>

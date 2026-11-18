@@ -87,3 +87,15 @@ test('fiscalidad: fichero válido, tipo vigente por fecha y aviso de caducidad',
   assert.match(f.validarFiscal(malo).join(), /solapa/);
 });
 
+
+test('informe semanal: uno por semana ISO y datos congelables', async () => {
+  const { semanaISO, calcularInforme } = await import('../src/lib/informe.mjs');
+  assert.equal(semanaISO('2026-11-16'), semanaISO('2026-11-22')); // lunes y domingo de la misma semana
+  assert.notEqual(semanaISO('2026-11-22'), semanaISO('2026-11-23'));
+  assert.equal(semanaISO('2021-01-03'), '2020-W53');
+  assert.equal(semanaISO('2024-12-30'), '2025-W01');
+  const inf = calcularInforme();
+  assert.equal(inf.fecha, d.FECHA);
+  assert.deepEqual(JSON.parse(JSON.stringify(inf)), inf); // se puede guardar en JSON sin perder nada
+  assert.ok(inf.provs.ga.every((x, i, a) => !i || a[i - 1].v >= x.v));
+});

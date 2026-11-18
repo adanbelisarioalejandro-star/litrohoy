@@ -1,12 +1,14 @@
 ---
 import { FUENTE, FUENTE_URL, FECHA, ACTUALIZADO, fechaLarga } from '../lib/datos.mjs';
 // '16/11/2026 2:19:02' -> '02:19'
+// fecha: para páginas congeladas (informes semanales archivados), la de sus datos en vez de la de hoy
+const { fecha = FECHA } = Astro.props;
 const hm = ACTUALIZADO.split(' ')[1]?.split(':');
-const hora = hm?.length >= 2 ? `${hm[0].padStart(2, '0')}:${hm[1]}` : null;
+const hora = fecha === FECHA && hm?.length >= 2 ? `${hm[0].padStart(2, '0')}:${hm[1]}` : null;
 ---
 <p class="fuente">
   <strong>Fuente:</strong> <a href={FUENTE_URL} rel="nofollow noopener" target="_blank">{FUENTE}</a>.
-  Datos actualizados el <time datetime={FECHA}>{fechaLarga(FECHA)}</time>{hora && ` (${hora} h)`}.
+  Datos {fecha === FECHA ? 'actualizados el' : 'del'} <time datetime={fecha}>{fechaLarga(fecha)}</time>{hora && ` (${hora} h)`}.
   Precios por litro con impuestos, tal como los comunica cada estación; pueden cambiar a lo largo del día.
   <a href="/metodologia/">Cómo calculamos las medias</a>.
 </p>

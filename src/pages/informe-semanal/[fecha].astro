@@ -1,0 +1,8 @@
+---
+// URL permanente de cada informe semanal archivado. El más reciente apunta (canonical) a /informe-semanal/, que muestra lo mismo.
+import InformeSemanal from '../../components/InformeSemanal.astro';
+import { informesArchivados } from '../../lib/informe.mjs';
+export const getStaticPaths = () => informesArchivados.map((inf, i) => ({ params: { fecha: inf.fecha }, props: { inf, actual: i === 0 } }));
+const { inf, actual } = Astro.props;
+---
+<InformeSemanal inf={inf} todos={informesArchivados} path={actual ? '/informe-semanal/' : `/informe-semanal/${inf.fecha}/`} actual={actual} />

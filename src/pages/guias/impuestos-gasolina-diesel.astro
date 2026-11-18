@@ -48,7 +48,7 @@ const c = (x) => num(x * 100, 1);
   <h2>Los cambios de 2026: rebajas temporales</h2>
   <p>Desde el 22 de marzo de 2026, con el Plan Integral de Respuesta a la Crisis en Oriente Medio, el Gobierno ha rebajado el impuesto sobre hidrocarburos mediante tres reales decretos-ley, y entre el 22 de marzo y el 31 de mayo también bajó el IVA de los carburantes al 10 % (en junio, probablemente también; ese dato no está confirmado, lo explicamos debajo de la tabla). Las rebajas de cada mes dependían de que el IPC del carburante subiera más de un 15 % interanual (cláusulas de salvaguarda, con los datos del INE). Esta es la cronología, con el impuesto por litro y la diferencia frente al tipo normal:</p>
   <TablaFiscal carb={['g95', 'ga', 'gb']} hoy={FECHA} />
-  <p>Cuando termina una rebaja sin prórroga, se vuelve automáticamente a los tipos normales de la ley. {F.rebaja && <>La actual acaba el {fechaLarga(F.hasta)}.</>} Revisamos estos tipos cada día con nuestro bot y los contrastamos con el BOE.</p>
+  <p>Cuando termina una rebaja sin prórroga, se vuelve automáticamente a los tipos normales de la ley. {F.rebaja && <>La actual acaba el {fechaLarga(F.hasta)}.</>} El bot que actualiza la web avisa cada día cuando una rebaja está a punto de terminar, para cambiar los tipos según lo que publique el BOE.</p>
 
   <h2>Desglose de un litro con los precios de hoy</h2>
   <p>Media de las gasolineras de la Península y Baleares (sin Canarias, Ceuta ni Melilla), con los tipos vigentes hoy:</p>

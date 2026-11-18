@@ -35,6 +35,7 @@ jobs:
       PUBLIC_ADSENSE_ID: ${{ vars.PUBLIC_ADSENSE_ID }}
       PUBLIC_ADSENSE_SLOT: ${{ vars.PUBLIC_ADSENSE_SLOT }}
       BASE_PATH: ${{ vars.BASE_PATH }} # solo vista previa en github.io (p. ej. /litrohoy); vacía con dominio propio
+      MAPA_PROVEEDOR: ${{ vars.MAPA_PROVEEDOR }} # proveedor de teselas (src/lib/mapa.mjs); vacía = OpenStreetMap
       AVISO_FILE: ${{ github.workspace }}/aviso.md
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -91,6 +92,10 @@ jobs:
       - name: 2. Ampliar (máx. 40 municipios que pasen el control)
         if: steps.semana.outputs.si == 'true'
         run: node scripts/expand.mjs
+
+      - name: Archivar el informe semanal (uno por semana, URL permanente)
+        if: steps.semana.outputs.si == 'true'
+        run: node scripts/archivar-informe.mjs
 
       - name: Build + control de calidad
         run: |
