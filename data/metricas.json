@@ -1,5 +1,5 @@
 {
- "fecha": "2026-11-18",
+ "fecha": "2026-11-23",
  "gsc": null,
  "adsense": null,
  "errores": [
@@ -51,6 +51,12 @@
   },
   {
    "fecha": "2026-11-18",
+   "clics": 0,
+   "impresiones": 0,
+   "ingresos": null
+  },
+  {
+   "fecha": "2026-11-23",
    "clics": 0,
    "impresiones": 0,
    "ingresos": null

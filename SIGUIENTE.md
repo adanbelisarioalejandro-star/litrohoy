@@ -1,6 +1,6 @@
 # Siguiente: mejoras que el bot no puede hacer solo
 
-_Actualizado automáticamente el 2026-11-18, por orden de impacto en ingresos (visitas reales × valor de los anuncios)._
+_Actualizado automáticamente el 2026-11-23, por orden de impacto en ingresos (visitas reales × valor de los anuncios)._
 
 1. **AdSense**: solicitar la aprobación del sitio y definir la variable PUBLIC_ADSENSE_ID (PENDIENTE.md).
 2. **Search Console**: conectarlo (solo lectura) para que el bot mida visitas y mejore páginas.

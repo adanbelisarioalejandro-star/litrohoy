@@ -1,19 +1,19 @@
 # Informe semanal del bot
 
-_Generado automáticamente el 2026-11-18. Datos de precios del 2026-11-18 (11536 estaciones)._
+_Generado automáticamente el 2026-11-23. Datos de precios del 2026-11-23 (11539 estaciones)._
 
 ## Páginas
 | Concepto | Valor |
 |---|---|
-| Páginas revisadas por el control de calidad | 388 |
+| Páginas revisadas por el control de calidad | 440 |
 | Páginas con fallos de calidad | 0 |
-| Municipios publicados | 265 |
-| Municipios nuevos esta semana | 265 |
-| Municipios aptos pendientes de publicar | 806 |
+| Municipios publicados | 305 |
+| Municipios nuevos esta semana | 40 |
+| Municipios aptos pendientes de publicar | 763 |
 | Municipios bloqueados por el control de calidad | 0 |
 | Municipios retirados del índice (sin visitas 90 días) | 0 |
 
-Nuevos: /gasolineras/caceres/caceres/, /gasolineras/caceres/trujillo/, /gasolineras/cadiz/jerez-de-la-frontera/, /gasolineras/cadiz/chiclana-de-la-frontera/, /gasolineras/cadiz/el-puerto-de-santa-maria/, /gasolineras/cadiz/algeciras/, /gasolineras/cadiz/cadiz/, /gasolineras/cadiz/san-roque/, /gasolineras/cadiz/conil-de-la-frontera/, /gasolineras/cadiz/sanlucar-de-barrameda/, /gasolineras/cadiz/arcos-de-la-frontera/, /gasolineras/cadiz/san-fernando/, /gasolineras/cadiz/los-barrios/, /gasolineras/castellon/castellon-de-la-plana-castello-de-la-plana/, /gasolineras/castellon/villarreal-vila-real/, /gasolineras/castellon/onda/, /gasolineras/castellon/vinaros/, /gasolineras/castellon/benicarlo/, /gasolineras/castellon/burriana/, /gasolineras/castellon/la-vall-d-uixo/, /gasolineras/ciudad-real/ciudad-real/, /gasolineras/ciudad-real/valdepenas/, /gasolineras/ciudad-real/tomelloso/, /gasolineras/ciudad-real/alcazar-de-san-juan/, /gasolineras/ciudad-real/puertollano/, /gasolineras/ciudad-real/manzanares/, /gasolineras/ciudad-real/daimiel/, /gasolineras/cordoba/cordoba/, /gasolineras/cordoba/lucena/, /gasolineras/cordoba/la-carlota/, /gasolineras/cordoba/puente-genil/, /gasolineras/a-coruna/a-coruna/, /gasolineras/a-coruna/santiago-de-compostela/, /gasolineras/a-coruna/naron/, /gasolineras/a-coruna/arteixo/, /gasolineras/a-coruna/carballo/, /gasolineras/a-coruna/oleiros/, /gasolineras/cuenca/cuenca/, /gasolineras/girona/la-jonquera/, /gasolineras/girona/girona/
+Nuevos: /gasolineras/caceres/navalmoral-de-la-mata/, /gasolineras/caceres/miajadas/, /gasolineras/caceres/plasencia/, /gasolineras/cadiz/puerto-real/, /gasolineras/cadiz/la-linea-de-la-concepcion/, /gasolineras/cadiz/tarifa/, /gasolineras/a-coruna/culleredo/, /gasolineras/a-coruna/ferrol/, /gasolineras/granada/atarfe/, /gasolineras/granada/armilla/, /gasolineras/granada/cullar/, /gasolineras/guadalajara/azuqueca-de-henares/, /gasolineras/huelva/ayamonte/, /gasolineras/jaen/alcala-la-real/, /gasolineras/leon/san-andres-del-rabanedo/, /gasolineras/lleida/balaguer/, /gasolineras/madrid/ciempozuelos/, /gasolineras/madrid/navalcarnero/, /gasolineras/malaga/cartama/, /gasolineras/murcia/cieza/, /gasolineras/murcia/san-pedro-del-pinatar/, /gasolineras/murcia/puerto-lumbreras/, /gasolineras/murcia/santomera/, /gasolineras/navarra/estella-lizarra/, /gasolineras/navarra/bera-vera-de-bidasoa/, /gasolineras/ourense/san-cibrao-das-vinas/, /gasolineras/asturias/mieres/, /gasolineras/las-palmas/tias/, /gasolineras/pontevedra/sanxenxo/, /gasolineras/pontevedra/tui/, /gasolineras/salamanca/carbajosa-de-la-sagrada/, /gasolineras/sevilla/mairena-del-alcor/, /gasolineras/sevilla/san-juan-de-aznalfarache/, /gasolineras/sevilla/lebrija/, /gasolineras/sevilla/marchena/, /gasolineras/sevilla/las-cabezas-de-san-juan/, /gasolineras/valencia/manises/, /gasolineras/valencia/aldaia/, /gasolineras/valencia/chiva/, /gasolineras/burgos/miranda-de-ebro/
 
 ## Errores y avisos
 - Medición: Search Console no conectado (faltan GSC_CREDENTIALS/GSC_SITE)
@@ -36,3 +36,4 @@ AdSense aún no conectado (ver PENDIENTE.md).
 | 2026-11-16 | 0 | 0 | — |
 | 2026-11-16 | 0 | 0 | — |
 | 2026-11-18 | 0 | 0 | — |
+| 2026-11-23 | 0 | 0 | — |
